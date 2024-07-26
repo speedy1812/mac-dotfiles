@@ -59,7 +59,6 @@
 
 [commit]
   template = ~/.gitmessage
-  gpgsign = true
 
 [core]
   autocrlf     = input
@@ -120,6 +119,3 @@
 
 [url "https://"]
   insteadOf = git://
-
-[gpg]
-  format = ssh
