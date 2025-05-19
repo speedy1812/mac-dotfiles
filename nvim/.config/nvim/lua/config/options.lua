@@ -11,3 +11,4 @@ vim.opt.listchars:append({ trail = "·" })
 -- LSP Ruby configuration
 vim.g.lazyvim_ruby_lsp = "ruby_lsp"
 vim.g.lazyvim_ruby_formatter = "standardrb"
+vim.opt.colorcolumn = "81"
