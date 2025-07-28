@@ -1,12 +1,5 @@
 . "$HOME/.config/zsh/profiler.start"
 
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-# if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-#   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-# fi
-
 if [ "$(arch)" = arm64 ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
 else
@@ -14,18 +7,11 @@ else
 fi
 
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$HOME/.local/bin:$HOME/.bin:$PATH"
-export EDITOR="nvim"
-export GIT_EDITOR="nvim"
-export BUNDLER_EDITOR=$EDITOR
-export MANPAGER="less -X" # Don’t clear the screen after quitting a manual page
-export HOMEBREW_CASK_OPTS="--appdir=/Applications"
-export SOURCE_ANNOTATION_DIRECTORIES="spec"
-export RUBY_CONFIGURE_OPTS="--with-opt-dir=$HOMEBREW_PREFIX/opt/openssl:$HOMEBREW_PREFIX/opt/readline:$HOMEBREW_PREFIX/opt/libyaml:$HOMEBREW_PREFIX/opt/gdbm"
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_STATE_HOME="$HOME/.local/state"
-export DOTFILES="$HOME/dotfiles"
+
+# Shared environment variables
+source "$HOME/dotfiles/shared/environment.sh"
+
+# Zsh-specific environment variables
 export ABBR_USER_ABBREVIATIONS_FILE="$XDG_CONFIG_HOME/zsh-abbr/abbreviations.zsh"
 export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 export PKG_CONFIG_PATH="/opt/homebrew/opt/libpq/lib/pkgconfig"
@@ -37,16 +23,16 @@ export PKG_CONFIG_PATH="/opt/homebrew/opt/libpq/lib/pkgconfig"
 . "$XDG_CONFIG_HOME/zsh/docker.sh"
 . "$HOME/.zshrc.local"
 
+# Configure npm to use asdf's Node for global packages
+if command -v npm >/dev/null; then
+    export npm_config_prefix=$(dirname $(dirname $(which node)))
+fi
+
 export HISTSIZE=1000000000
 export SAVEHIST=1000000000
 export HISTFILE=~/.zsh_history
 export HIST_STAMPS="yyyy-mm-dd"
 
-# FZF specific - https://github.com/junegunn/fzf#key-bindings-for-command-line
-export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --no-ignore-vcs"
-export FZF_DEFAULT_OPTS="--height 75% --layout=reverse --border"
-export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
-export FZF_ALT_C_COMMAND="fd --type d . --color=never"
 
 # homebrew completions
 # https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
@@ -55,15 +41,31 @@ then
   FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
 fi
 
-# Load and initialise completion system
-autoload -Uz compinit && compinit
+# Docker CLI completions
+fpath=(/Users/joshukraine/.docker/completions $fpath)
+
+# Load and initialise completion system with caching for performance
+autoload -Uz compinit
+# shellcheck disable=SC1036,SC1072,SC1073,SC1009
+if [[ -n "${ZDOTDIR:-${HOME}}"/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
 
 # De-dupe $PATH
 typeset -U path
 
-# GitHub Copilot CLI
-if command -v gh >/dev/null && gh extension list | grep -q 'copilot'; then
-  eval "$(gh copilot alias -- zsh)"
+# GitHub Copilot CLI (lazy load for performance)
+if command -v gh >/dev/null 2>&1; then
+  gh_copilot_lazy() {
+    if gh extension list 2>/dev/null | grep -q 'copilot'; then
+      eval "$(gh copilot alias -- zsh)"
+      unfunction gh_copilot_lazy
+    fi
+  }
+  alias ghcs="gh_copilot_lazy && ghcs"
+  alias ghce="gh_copilot_lazy && ghce"
 fi
 
 . "$HOME/.config/zsh/profiler.stop"

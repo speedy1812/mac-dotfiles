@@ -5,9 +5,9 @@
 ## 🤩 Highlights
 
 - [Neovim][neovim] editor configured with [LazyVim][lazyvim]💤
-- [Starship][starship] prompt (or [Powerlevel10K][p10k])
-- Shell support for both [Zsh][zsh] and [Fish][fish] with 90% functional parity
-- Flexible, terminal-based dev environment with [kitty][kitty]!😻 (or [iTerm2][iterm2]+[Tmux][tmux])
+- [Starship][starship] prompt
+- Shell support for both [Zsh][zsh] and [Fish][fish] with 95% functional parity via shared configuration
+- Flexible, terminal-based dev environment with [ghostty][ghostty] 👻 + [Tmux][tmux]!
 - Fast, idempotent setup with [GNU Stow][gnu-stow]
 - New Mac bootstrap based on thoughtbot’s [Laptop][laptop]
 - Support for both Apple Silicon and Intel Macs
@@ -18,9 +18,10 @@
 - [Prerequisites](#-prerequisites)
 - [New Mac Bootstrap](#-new-mac-bootstrap)
 - [Zsh or Fish?](#zsh-or-fish)
+- [Shared Configuration Framework](#shared-configuration-framework)
+- [Documentation](#-documentation)
+- [Markdown Linting](#markdown-linting)
 - [About Neovim Distributions](#about-neovim-distributions)
-- [Good-bye, Tmux?](#-good-bye-tmux)
-- [Hello, kitty!](#-hello-kitty)
 - [My Favorite Programming Fonts](#my-favorite-programming-fonts)
 - [Nerd Fonts and Icons](#nerd-fonts-and-icons)
 - [A Note about Vim performance and Ruby files](#a-note-about-vim-performance-and-ruby-files)
@@ -32,6 +33,8 @@
 
 ## ⚡️ Quick Setup
 
+**For first-time users**: See the [complete setup documentation](docs/setup/) for detailed guidance.
+
 Make sure macOS is up to date and you have installed the [required software](#-prerequisites).
 
 Clone this repo.
@@ -40,17 +43,37 @@ Clone this repo.
 git clone https://github.com/joshukraine/dotfiles.git ~/dotfiles
 ```
 
-Read the setup script.
+Read the setup script and check available options.
 
 ```sh
 less ~/dotfiles/setup.sh
+~/dotfiles/setup.sh --help
+```
+
+Preview what the setup script will do (dry-run mode).
+
+```sh
+~/dotfiles/setup.sh --dry-run
 ```
 
 Run the setup script.
 
 ```sh
-bash ~/dotfiles/setup.sh
+~/dotfiles/setup.sh
 ```
+
+## 📚 Comprehensive Setup Documentation
+
+For detailed guidance on installation, customization, and troubleshooting:
+
+| Guide                                                      | Purpose                                      |
+| ---------------------------------------------------------- | -------------------------------------------- |
+| **[Setup Overview](docs/setup/README.md)**                 | Choose the right guide for your situation    |
+| **[Installation Guide](docs/setup/installation-guide.md)** | Complete step-by-step setup walkthrough      |
+| **[Usage Examples](docs/setup/usage-examples.md)**         | Command examples and practical scenarios     |
+| **[Troubleshooting](docs/setup/troubleshooting.md)**       | Solutions for common setup issues            |
+| **[Customization](docs/setup/customization.md)**           | Personalizing your dotfiles setup            |
+| **[Migration Guide](docs/setup/migration.md)**             | Moving from other dotfiles or manual configs |
 
 ## ✅ Prerequisites
 
@@ -64,6 +87,7 @@ The dotfiles assume you are running macOS with (at minimum) the following softwa
 - [Zsh][zsh] and/or [Fish][fish]
 - [Neovim][neovim]
 - [Starship][starship]
+- [`yq`][yq] (for regenerating abbreviations from shared YAML source)
 
 All of the above and more are installed with my fork of [Laptop][joshuas-laptop].
 
@@ -129,16 +153,18 @@ Clone
 git clone https://github.com/joshukraine/dotfiles.git ~/dotfiles
 ```
 
-Read
+Read and preview
 
 ```sh
 less ~/dotfiles/setup.sh
+~/dotfiles/setup.sh --help
+~/dotfiles/setup.sh --dry-run  # Preview changes without applying them
 ```
 
 Setup
 
 ```sh
-bash ~/dotfiles/setup.sh
+~/dotfiles/setup.sh
 ```
 
 If you do encounter Stow conflicts, resolve these and run setup again. The script is idempotent, so you can run it multiple times safely.
@@ -170,11 +196,10 @@ brew bundle install
 
 - [ ] Launch LazyVim (`nvim`) and run [`:checkhealth`][checkhealth]. Resolve errors and warnings. Plugins should install automatically on first launch.
 - [ ] Add personal data as needed to `*.local` files such as `~/.gitconfig.local`, `~/.laptop.local`, `~/dotfiles/local/config.fish.local`.
-- [ ] Set up [1Password CLI][1p-cli-start] for managing secrets.
-- [ ] Set up [1Password SSH key management][1p-cli-ssh].
+- [ ] (Optional) Set up [1Password CLI][1p-cli-start] for managing secrets.
+- [ ] (Optional) Set up [1Password SSH key management][1p-cli-ssh].
 - [ ] If using Fish, customize your setup by running the `fish_config` command.
-- [ ] If using Zsh, edit `.zshrc` and `plugins.zsh` to select either [Starship][starship] or [Powerlevel10K][p10k] as your prompt.
-- [ ] If using Tmux, install Tmux plugins with `<prefix> + I` (https://github.com/tmux-plugins/tpm)
+- [ ] Install Tmux plugins with `<prefix> + I` (<https://github.com/tmux-plugins/tpm>)
 
 ## Zsh or Fish?
 
@@ -182,14 +207,16 @@ Having used both Zsh and Fish for several years, I’ve decided to keep my confi
 
 &#9657; **[Fish abbr docs](https://fishshell.com/docs/current/cmds/abbr.html)**
 
-My Zsh and Fish configs mostly have functional parity:
+My Zsh and Fish configs have 95% functional parity via shared configuration:
 
 - Same prompt (Starship)
-- Same essential abbreviations and functions
+- Identical abbreviations (250+) generated from single YAML source
+- Shared environment variables
+- Smart git functions with automatic branch detection
 
 <details>
   <summary><strong>Zsh Setup Instructions</strong></summary>
-Zsh is now the default shell on macOS. However, it’s helpful to add an entry enabling the Homebrew version of Zsh (`$HOMEBREW_PREFIX/bin/zsh`) instead of the default (`/bin/zsh`) version.
+Zsh is now the default shell on macOS. However, it's helpful to add an entry enabling the Homebrew version of Zsh (`/opt/homebrew/bin/zsh` on Apple Silicon, `/usr/local/bin/zsh` on Intel) instead of the default (`/bin/zsh`) version.
 
 Ensure that you have Zsh from Homebrew. (`which zsh`) If not:
 
@@ -200,7 +227,14 @@ brew install zsh
 Add Zsh (Homebrew version) to `/etc/shells`:
 
 ```sh
-echo $HOMEBREW_PREFIX/bin/zsh | sudo tee -a /etc/shells
+# Apple Silicon Macs:
+echo /opt/homebrew/bin/zsh | sudo tee -a /etc/shells
+
+# Intel Macs:
+echo /usr/local/bin/zsh | sudo tee -a /etc/shells
+
+# Or use this universal command:
+echo $(which zsh) | sudo tee -a /etc/shells
 ```
 
 Set it as your default shell:
@@ -226,7 +260,14 @@ Install Fish from Homebrew:
 Add Fish to `/etc/shells`:
 
 ```sh
-echo $HOMEBREW_PREFIX/bin/fish | sudo tee -a /etc/shells
+# Apple Silicon Macs:
+echo /opt/homebrew/bin/fish | sudo tee -a /etc/shells
+
+# Intel Macs:
+echo /usr/local/bin/fish | sudo tee -a /etc/shells
+
+# Or use this universal command:
+echo $(which fish) | sudo tee -a /etc/shells
 ```
 
 Set it as your default shell:
@@ -239,9 +280,174 @@ Restart your terminal. This will create the `~/.config` and `~/.local` directori
 
 </details>
 
+## Shared Configuration Framework
+
+The dotfiles use a unified configuration system that eliminates duplication between Fish and Zsh shells:
+
+### Key Components
+
+- **`shared/abbreviations.yaml`** - Single source of truth for all 250+ abbreviations
+- **`shared/environment.sh` and `shared/environment.fish`** - Common environment variables
+- **`shared/generate-all-abbr.sh`** - Unified script to regenerate abbreviations for all shells
+- **`shared/generate-fish-abbr.sh` and `shared/generate-zsh-abbr.sh`** - Individual shell-specific generation scripts
+
+### Adding or Modifying Abbreviations
+
+1. Edit `~/dotfiles/shared/abbreviations.yaml`
+2. Regenerate all abbreviations (from any directory):
+
+   ```bash
+   reload-abbr    # Available as a shell function - works from anywhere!
+   ```
+
+3. Reload your shell configuration:
+   - Fish: `exec fish` or open a new terminal
+   - Zsh: `src` or open a new terminal
+
+<details>
+  <summary><strong>Alternative methods</strong></summary>
+
+**Manual script execution:**
+
+```bash
+cd ~/dotfiles/shared
+./generate-all-abbr.sh     # Updates both Fish and Zsh abbreviation files
+```
+
+**Individual shell regeneration:**
+
+```bash
+cd ~/dotfiles/shared
+./generate-fish-abbr.sh    # Updates fish/.config/fish/abbreviations.fish
+./generate-zsh-abbr.sh     # Updates zsh/.config/zsh-abbr/abbreviations.zsh
+```
+
+</details>
+
+> [!IMPORTANT]
+> Never edit the generated abbreviation files directly - changes will be overwritten!
+
+### Smart Git Functions
+
+The shared configuration includes intelligent git functions that automatically detect your main branch:
+
+- `gpum` - Pull from upstream main/master
+- `grbm` - Rebase on main/master
+- `gcom` - Checkout main/master
+- `gbrm` - Remove branches merged into main/master
+
+These functions work with both `main` and `master` branch names automatically.
+
+## 📚 Documentation
+
+This repository includes comprehensive documentation for all shell functions and abbreviations to improve maintainability and user experience.
+
+### Function Documentation
+
+All 35+ shell functions are thoroughly documented with standardized inline comments and external reference guides:
+
+- **[Function Overview](docs/functions/README.md)** - Complete index of all functions with descriptions and categories
+- **[Git Functions](docs/functions/git-functions.md)** - Smart git operations with automatic branch detection
+- **[Development Tools](docs/functions/development.md)** - Development utilities, navigation shortcuts, and command wrappers
+- **[Tmux Functions](docs/functions/tmux.md)** - Terminal multiplexer session management and workflows
+- **[System Functions](docs/functions/system.md)** - System utilities, process management, and command enhancements
+
+### Abbreviations Reference
+
+All 289 shell abbreviations are documented with usage examples and descriptions:
+
+- **[Complete Abbreviations Reference](docs/abbreviations.md)** - Comprehensive guide to all abbreviations across categories
+  - UNIX commands with enhanced options
+  - Git workflow shortcuts
+  - Development tool shortcuts
+  - Homebrew package management
+  - Docker, Rails, Node.js, and more
+
+### Documentation Standards
+
+- **Standardized Format**: All functions include usage, arguments, examples, and return values
+- **Cross-Shell Consistency**: Identical documentation quality in both Fish and Zsh
+- **Practical Examples**: Real-world usage scenarios and workflow integration
+- **Cross-References**: Links between related functions and abbreviations
+
+### Regenerating Documentation
+
+**Function Documentation**: Manually maintained with standardized inline comments and reference guides.
+
+**Abbreviation Documentation**: Fully automated! Generated from `shared/abbreviations.yaml`:
+
+```bash
+# Regenerate everything (abbreviations + documentation)
+reload-abbr
+
+# Or manually from the dotfiles directory
+~/dotfiles/shared/generate-all-abbr.sh
+
+# Individual generators (for development)
+~/dotfiles/shared/generate-fish-abbr.sh          # Fish abbreviations only
+~/dotfiles/shared/generate-zsh-abbr.sh           # Zsh abbreviations only
+~/dotfiles/shared/generate-abbreviations-doc.sh  # Documentation only
+```
+
+**What gets regenerated automatically:**
+
+- `fish/.config/fish/abbreviations.fish` (288 abbreviations)
+- `zsh/.config/zsh-abbr/abbreviations.zsh` (289 abbreviations)
+- `docs/abbreviations.md` (complete reference documentation)
+
+**After regeneration:** Reload your shell (`exec fish` or `src`) to use new abbreviations.
+
+## Markdown Linting
+
+This repository includes a complete markdownlint setup for consistent markdown formatting across all projects.
+
+### Features
+
+- **Global Configuration**: Uses `~/.markdownlint.yaml` with sensible defaults:
+  - Disabled line length rule (MD013) for better readability
+  - Allows common inline HTML elements (`details`, `summary`, `strong`)
+  - Supports trailing punctuation including CJK characters
+  - Allows bare URLs (MD034 disabled)
+- **Shell Abbreviations**: Quick access via `mdl` commands
+- **Editor Integration**: Works seamlessly with Neovim/LazyVim
+- **CI/CD Support**: Includes sample GitHub Actions workflow
+
+### Usage
+
+```bash
+# Install markdownlint-cli2 (if not already installed)
+brew bundle install
+
+# Lint files using abbreviations
+mdl README.md              # Lint single file
+mdlf README.md             # Auto-fix single file
+mdla                       # Lint all .md files recursively
+mdlaf                      # Fix all .md files recursively
+
+# Or use the global helper script
+mdl-global README.md       # Always uses ~/.markdownlint.yaml
+```
+
+### CI Integration
+
+Copy the example workflow to any project:
+
+```bash
+cp ~/dotfiles/.github/workflows/markdownlint.yml.example .github/workflows/markdownlint.yml
+```
+
+This will run markdownlint on all markdown files in pull requests and pushes.
+
+### Customization
+
+- **Global config**: Edit `~/dotfiles/markdown/.markdownlint.yaml`
+- **Project-specific**: Create `.markdownlint.yaml` in your project root
+- **Add abbreviations**: Edit `~/dotfiles/shared/abbreviations.yaml` and run `reload-abbr`
+
 ## About Neovim Distributions
 
-**TL;DR:** Just install [LazyVim][lazyvim]💤
+> [!TIP]
+> **TL;DR:** Just install [LazyVim][lazyvim]💤
 
 📺 [Zero to IDE with LazyVim][zero-to-ide-lazyvim-video]
 
@@ -256,29 +462,6 @@ If you want a quick primer on Neovim distros, **check out the YouTube video belo
 📺 [I tried Neovim Distributions so you don't have to][i-tried-neovim-distros-video]
 
 Boy, when I reminisce about the days of writing PHP for Internet Explorer in BBEdit...
-
-## 🫣 Good-bye, Tmux?
-
-I have nothing but warm fuzzy feelings towards Tmux. ... Ok, _mostly_ warm and fuzzy. Tmux is amazing, and once I learned how to use it, it forever changed the way I came to see my terminal. I now expect the ability to spawn as many splits/panes/windows as needed, at any time, in any arrangement I choose, easily accessible through keyboard shortcuts.
-
-But as anyone who has used Tmux can tell you, it's not without its trade-offs: copy/paste issues, color problems, font irregularities, etc. Yes, it was worth it, and somehow I always found workarounds. Still, at the end of the day, I don't consider myself a “Tmux power user”. That is, I don't usually need multiple sessions (tabs will do) or even persistence. I'm mostly here for the layouts. And for that, I found [kitty][kitty]...
-
-## 😸 Hello, kitty!
-
-The argument can be made that kitty vs. Tmux is an [apples-to-oranges](https://www.reddit.com/r/KittyTerminal/comments/zxileg/comment/j214m0r/) comparison. kitty is a terminal _emulator_ whereas Tmux is a terminal _multiplexer_. But if you don't need all the features of Tmux (and you don't want to hassle with the Tmux overhead) I think kitty is a fine, much lighter replacement. As one Reddit user put it:
-
-> “...basic multiplexer = Kitty; advanced multiplexer = TMUX”.[^1]
-
-In addition to native split-pane support (think Tmux Lite), kitty brings a host of other cool features to the party including speed (GPU-based), excellent font support, extensible with “kittens”, and highly configurable via `kitty.conf`. In essence, kitty has allowed me to greatly simplify my development environment by going from Vim+iTerm2+Tmux to simply Vim+kitty.
-
-I'm glad Tmux exists, I'm grateful for what it's taught me, and I'll probably use it again from time to time. Meanwhile, kitty is awesome...and I can finally [change my colorscheme](https://sw.kovidgoyal.net/kitty/kittens/themes/) without having to reconcile THREE colorschemes! 🤪
-
-> [!NOTE]
-> Be sure to [get yourself a cool icon](https://youtu.be/ZaYTv2eBNr8) for kitty! HINT: Get [this one](https://github.com/DinkDonk/kitty-icon). 😻
-
-### Still not convinced?
-
-Fear not: if you're using these dotfiles and you'd rather stay with iTerm2 and Tmux, **I've kept all of the Tmux-related configs, functions, aliases and abbreviations I had before**. I'm not installing Tmux by default anymore, but you need only uncomment the appropriate lines in `.laptop.local` and `Brewfile`, and you're back in business.
 
 ## My Favorite Programming Fonts
 
@@ -332,8 +515,8 @@ Leveraging this approach depends on your terminal. In iTerm2, for example, you n
 kitty does things a little differently. If you install a patched font, it will mostly work. Mostly. But the “kitty way” can be broken down in three steps:
 
 1. Install a normal, un-patched mono-spaced font, such as `Cascadia Code`
-1. Install a dedicated icon font, such as `Symbols Nerd Font Mono`
-1. Create a set of Unicode symbol maps[^2] to tell kitty which font to use for which icons (symbols)
+2. Install a dedicated icon font, such as `Symbols Nerd Font Mono`
+3. Create a set of Unicode symbol maps[^2] to tell kitty which font to use for which icons (symbols)
 
 More work up front, maybe, but less guesswork in the long-term once you understand what's going on. And if you're using my dotfiles, you have it easy. **All the fonts you need are installed in `Brewfile`, and I have a set of Unicode symbol maps ready to go.** 😎
 
@@ -373,58 +556,56 @@ The `.zshrc` script can be profiled by touching the file `~/.zshrc.profiler` and
 
 ## Awesome Neovim Dotfiles, Distros, and Starters
 
-- https://github.com/LazyVim/lazyvim
-- https://github.com/LunarVim/LunarVim
-- https://github.com/NvChad/NvChad
-- https://github.com/LunarVim/Launch.nvim
-- https://github.com/folke/dot
-- https://github.com/nvim-lua/kickstart.nvim
-- https://github.com/ThePrimeagen/init.lua
-- https://github.com/elijahmanor/dotfiles
-- https://github.com/cpow/cpow-dotfiles
-- https://github.com/josean-dev/dev-environment-files
-- https://github.com/glepnir/nvim
-- https://github.com/numToStr/dotfiles
-- https://github.com/jdhao/nvim-config
-- https://github.com/brainfucksec/neovim-lua
-- https://github.com/disrupted/dotfiles
-- https://github.com/topics/neovim-dotfiles
-- https://github.com/topics/neovim-config
+- <https://github.com/LazyVim/lazyvim>
+- <https://github.com/LunarVim/LunarVim>
+- <https://github.com/NvChad/NvChad>
+- <https://github.com/LunarVim/Launch.nvim>
+- <https://github.com/folke/dot>
+- <https://github.com/nvim-lua/kickstart.nvim>
+- <https://github.com/ThePrimeagen/init.lua>
+- <https://github.com/elijahmanor/dotfiles>
+- <https://github.com/cpow/cpow-dotfiles>
+- <https://github.com/josean-dev/dev-environment-files>
+- <https://github.com/glepnir/nvim>
+- <https://github.com/numToStr/dotfiles>
+- <https://github.com/jdhao/nvim-config>
+- <https://github.com/brainfucksec/neovim-lua>
+- <https://github.com/disrupted/dotfiles>
+- <https://github.com/topics/neovim-dotfiles>
+- <https://github.com/topics/neovim-config>
 
 ## Some of my favorite dotfile repos
 
-- Pro Vim (https://github.com/Integralist/ProVim)
-- Trevor Brown (https://github.com/Stratus3D/dotfiles)
-- Chris Toomey (https://github.com/christoomey/dotfiles)
-- thoughtbot (https://github.com/thoughtbot/dotfiles)
-- Lars Kappert (https://github.com/webpro/dotfiles)
-- Ryan Bates (https://github.com/ryanb/dotfiles)
-- Ben Orenstein (https://github.com/r00k/dotfiles)
-- Joshua Clayton (https://github.com/joshuaclayton/dotfiles)
-- Drew Neil (https://github.com/nelstrom/dotfiles)
-- Kevin Suttle (https://github.com/kevinSuttle/OSXDefaults)
-- Carlos Becker (https://github.com/caarlos0/dotfiles)
-- Zach Holman (https://github.com/holman/dotfiles/)
-- Mathias Bynens (https://github.com/mathiasbynens/dotfiles/)
-- Paul Irish (https://github.com/paulirish/dotfiles)
+- Pro Vim (<https://github.com/Integralist/ProVim>)
+- Trevor Brown (<https://github.com/Stratus3D/dotfiles>)
+- Chris Toomey (<https://github.com/christoomey/dotfiles>)
+- thoughtbot (<https://github.com/thoughtbot/dotfiles>)
+- Lars Kappert (<https://github.com/webpro/dotfiles>)
+- Ryan Bates (<https://github.com/ryanb/dotfiles>)
+- Ben Orenstein (<https://github.com/r00k/dotfiles>)
+- Joshua Clayton (<https://github.com/joshuaclayton/dotfiles>)
+- Drew Neil (<https://github.com/nelstrom/dotfiles>)
+- Kevin Suttle (<https://github.com/kevinSuttle/OSXDefaults>)
+- Carlos Becker (<https://github.com/caarlos0/dotfiles>)
+- Zach Holman (<https://github.com/holman/dotfiles/>)
+- Mathias Bynens (<https://github.com/mathiasbynens/dotfiles/>)
+- Paul Irish (<https://github.com/paulirish/dotfiles>)
 
-## Helpful web resources on dotfiles, et al.
+## Helpful web resources on dotfiles, et al
 
-- http://dotfiles.github.io/
-- https://medium.com/@webprolific/getting-started-with-dotfiles-43c3602fd789
-- http://code.tutsplus.com/tutorials/setting-up-a-mac-dev-machine-from-zero-to-hero-with-dotfiles--net-35449
-- https://github.com/webpro/awesome-dotfiles
-- http://blog.smalleycreative.com/tutorials/using-git-and-github-to-manage-your-dotfiles/
-- http://carlosbecker.com/posts/first-steps-with-mac-os-x-as-a-developer/
-- https://mattstauffer.co/blog/setting-up-a-new-os-x-development-machine-part-1-core-files-and-custom-shell
+- <http://dotfiles.github.io/>
+- <https://medium.com/@webprolific/getting-started-with-dotfiles-43c3602fd789>
+- <http://code.tutsplus.com/tutorials/setting-up-a-mac-dev-machine-from-zero-to-hero-with-dotfiles--net-35449>
+- <https://github.com/webpro/awesome-dotfiles>
+- <http://blog.smalleycreative.com/tutorials/using-git-and-github-to-manage-your-dotfiles/>
+- <http://carlosbecker.com/posts/first-steps-with-mac-os-x-as-a-developer/>
+- <https://mattstauffer.co/blog/setting-up-a-new-os-x-development-machine-part-1-core-files-and-custom-shell>
 
 ## License
 
 Copyright &copy; 2014–2025 Joshua Steele. [MIT License][license]
 
-[^1]: https://www.reddit.com/r/KittyTerminal/comments/zxileg/comment/j21m4i4/
-
-[^2]: https://sw.kovidgoyal.net/kitty/conf/#opt-kitty.symbol_map
+[^2]: <https://sw.kovidgoyal.net/kitty/conf/#opt-kitty.symbol_map>
 
 [1p-cli-ssh]: https://developer.1password.com/docs/ssh
 [1p-cli-start]: https://developer.1password.com/docs/cli/get-started
@@ -437,6 +618,7 @@ Copyright &copy; 2014–2025 Joshua Steele. [MIT License][license]
 [fira-code]: https://github.com/tonsky/FiraCode
 [fish]: http://fishshell.com/
 [folke]: https://github.com/folke
+[ghostty]: https://ghostty.org/
 [git]: https://git-scm.com/
 [gnu-stow]: https://www.gnu.org/software/stow/
 [hack]: https://sourcefoundry.org/hack
@@ -445,10 +627,8 @@ Copyright &copy; 2014–2025 Joshua Steele. [MIT License][license]
 [i-tried-neovim-distros-video]: https://youtu.be/bbHtl0Pxzj8
 [install-clt]: https://www.freecodecamp.org/news/install-xcode-command-line-tools/
 [iterm2-font-settings]: https://res.cloudinary.com/dnkvsijzu/image/upload/v1700122897/screenshots/iterm2-config_xqevqo.png
-[iterm2]: https://www.iterm2.com/
 [jetbrains-mono]: https://www.jetbrains.com/lp/mono/
 [joshuas-laptop]: https://github.com/joshukraine/laptop
-[kitty]: https://sw.kovidgoyal.net/kitty/
 [laptop]: https://github.com/thoughtbot/laptop
 [lazyvim]: https://www.lazyvim.org/
 [license]: https://github.com/joshukraine/dotfiles/blob/master/LICENSE
@@ -462,13 +642,13 @@ Copyright &copy; 2014–2025 Joshua Steele. [MIT License][license]
 [nodejs]: https://nodejs.org/
 [operator-mono-lig]: https://github.com/kiliman/operator-mono-lig
 [operator-mono]: https://www.typography.com/fonts/operator/styles/operatormonoscreensmart
-[p10k]: https://github.com/romkatv/powerlevel10k
+[yq]: https://github.com/mikefarah/yq
 [programming-fonts]: https://app.programmingfonts.org/
 [ruby]: https://www.ruby-lang.org/en
 [screenshot]: https://res.cloudinary.com/dnkvsijzu/image/upload/v1700154289/screenshots/dotfiles-nov-2023_gx2wrw.png
 [smoke-test-output]: https://res.cloudinary.com/dnkvsijzu/image/upload/v1700085278/screenshots/smoke-test_tddntp.png
 [starship]: https://starship.rs/
-[symbols-nerd-font-mono]: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/NerdFontsSymbolsOnly.zip
+[symbols-nerd-font-mono]: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/NerdFontsSymbolsOnly.zip
 [tmux]: https://github.com/tmux/tmux/wiki
 [zap]: https://www.zapzsh.com/
 [zero-to-ide-lazyvim-video]: https://youtu.be/N93cTbtLCIM
