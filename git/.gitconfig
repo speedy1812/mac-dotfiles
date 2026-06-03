@@ -11,7 +11,6 @@
   cm = commit -v
   cl = clone
   co = checkout
-  com = checkout master
   df = diff
   dc = diff --cached
   f = fetch
@@ -20,14 +19,13 @@
   pl = pull
   ps = push
   psf = push --force-with-lease
-  pum = push -u origin master
   recent = for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
   rv = remote -v
   s = status
   tl = tag --list
   re = reset
   rsh = reset --soft HEAD^
-  wch = whatchanged -p --abbrev-commit --pretty=medium -10
+  wch = log -p --no-merges --abbrev-commit --pretty=medium -10
 
 [apply]
   whitespace = nowarn
@@ -59,6 +57,7 @@
 
 [commit]
   template = ~/.gitmessage
+  gpgSign = false
 
 [core]
   autocrlf     = input
@@ -114,8 +113,5 @@
 [status]
   submoduleSummary = true
 
-[url "https://github.com/"]
-  insteadOf = git@github.com:
-
-[url "https://"]
-  insteadOf = git://
+[tag]
+  gpgSign = false

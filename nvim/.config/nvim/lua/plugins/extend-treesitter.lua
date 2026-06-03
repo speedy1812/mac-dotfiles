@@ -8,7 +8,7 @@ return {
         "css",
         "diff",
         "embedded_template",
-        "fish",
+        "gotmpl",
         "html",
         "javascript",
         "jsdoc",

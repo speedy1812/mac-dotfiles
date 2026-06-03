@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!--
+  Debrief structural template.
+
+  The /debrief skill fills this skeleton, then inlines the shared house style
+  so the output is a single self-contained, portable .html file (no external
+  assets, no build step).
+
+  How to use:
+  - Copy this whole document, then replace the {{TOKENS}} and the annotated
+    section regions with real content.
+  - Produce a CLEAN artifact: strip every instructional comment (this head
+    block and the explanatory notes inside the body). They guide
+    template-filling only and must not appear in the output. (HTML comments
+    do not nest, so a stray instructional comment can also break rendering.)
+  - Inline the shared house style: copy the style block from
+    ../_shared/house-style.html into the head (replacing the HOUSE STYLE
+    marker) and the script block before the closing body tag. Do NOT link
+    external assets.
+  - Every major section is a <details> so the reader can collapse it.
+    Leave the high-value sections (What We Built, Product Tour) open by
+    default (the `open` attribute); collapse the rest.
+  - Use inline SVG for architecture / data-flow diagrams. Never ASCII art.
+  - The table of contents is plain anchor links to each section's id.
+  - Make anything the reader will paste (seed credentials, emails, URLs) a
+    click-to-copy control (the shared script powers it). The copied value is
+    the data-copy attribute, falling back to the element's text.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{PROJECT}} — Debrief: {{TITLE}}</title>
+<!-- HOUSE STYLE: inline the <style> block from ../_shared/house-style.html here -->
+</head>
+<body>
+<div class="wrap">
+
+  <!-- TABLE OF CONTENTS: one <li><a> per section below. Keep ids in sync. -->
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#built">What We Built</a></li>
+      <li><a href="#architecture">Architecture &amp; Decisions</a></li>
+      <li><a href="#tests">Test Coverage</a></li>
+      <li><a href="#tour">Product Tour</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="doc">
+      <p class="eyebrow">{{PROJECT}} · Debrief</p>
+      <h1>{{TITLE}}</h1>
+      <!-- METADATA: date, scope, PRs, issues, PRD references. Drop rows that don't apply. -->
+      <dl class="meta">
+        <dt>Date</dt><dd>{{DATE}}</dd>
+        <dt>Scope</dt><dd>{{SCOPE}}</dd>
+        <dt>PRs</dt><dd>{{PRS}}</dd>
+        <dt>Issues</dt><dd>{{ISSUES}}</dd>
+        <dt>PRD refs</dt><dd>{{PRD_REFS}}</dd>
+      </dl>
+    </header>
+
+    <!-- SECTION 1 — open by default (highest value) -->
+    <details class="section" id="built" open>
+      <summary>1 · What We Built (and Why It Matters)</summary>
+      <div class="section-body">
+        <!-- Summary of features completed; connection to PRD phase; scope in/deferred. -->
+        {{BUILT}}
+      </div>
+    </details>
+
+    <!-- SECTION 2 — collapsed by default -->
+    <details class="section" id="architecture">
+      <summary>2 · Architecture &amp; Design Decisions</summary>
+      <div class="section-body">
+        <!-- Models/schema, patterns, frontend decisions, rejected alternatives.
+             Use <figure class="diagram"> with inline <svg> for structure/data-flow.
+             Use <div class="callout"> for POODR spotlight. -->
+        {{ARCHITECTURE}}
+      </div>
+    </details>
+
+    <!-- SECTION 3 — collapsed by default -->
+    <details class="section" id="tests">
+      <summary>3 · Test Coverage &amp; Quality</summary>
+      <div class="section-body">
+        <!-- Testing philosophy, what was/ wasn't tested, suite results, verify commands. -->
+        {{TESTS}}
+      </div>
+    </details>
+
+    <!-- SECTION 4 — open by default (most important per skill) -->
+    <details class="section" id="tour" open>
+      <summary>4 · Product Tour — Try It Yourself</summary>
+      <div class="section-body">
+        <!-- One <div class="story"> per user story. Make credentials and URLs
+             click-to-copy so the reader can paste them without retyping. Pattern:
+        <div class="story">
+          <div class="story-head">Admin creates and approves a distributor
+            <span class="role-pill">Admin</span></div>
+          <div class="story-body">
+            <ol>
+              <li>Visit <button type="button" class="copy" data-copy="http://localhost:3000/admin/distributors">http://localhost:3000/admin/distributors</button></li>
+              <li>Log in as
+                <button type="button" class="copy" data-copy="admin@example.com">admin@example.com</button>
+                /
+                <button type="button" class="copy" data-copy="password">password</button></li>
+              <li>Click "Distributors" in the nav.
+                <span class="expect">Expected: the table lists 3 seeded orgs.</span></li>
+            </ol>
+          </div>
+        </div>
+        -->
+        {{TOUR}}
+      </div>
+    </details>
+
+    <footer class="doc">
+      Generated by the <code>/debrief</code> skill · {{DATE}}
+    </footer>
+  </main>
+</div>
+<!-- HOUSE STYLE: inline the <script> block from ../_shared/house-style.html here -->
+</body>
+</html>

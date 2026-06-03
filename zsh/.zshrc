@@ -6,7 +6,7 @@ else
     eval "$(/usr/local/bin/brew shellenv)"
 fi
 
-export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$HOME/.local/bin:$HOME/.bin:$PATH"
+export PATH="/opt/homebrew/opt/trash/bin:/opt/homebrew/opt/postgresql@17/bin:${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$HOME/.local/bin:$HOME/.bin:$PATH"
 
 # Shared environment variables
 source "$HOME/dotfiles/shared/environment.sh"
@@ -19,19 +19,29 @@ export PKG_CONFIG_PATH="/opt/homebrew/opt/libpq/lib/pkgconfig"
 . "$XDG_CONFIG_HOME/zsh/plugins.zsh" # Includes Zap - https://www.zapzsh.com
 . "$XDG_CONFIG_HOME/zsh/aliases.zsh"
 . "$XDG_CONFIG_HOME/zsh/functions.zsh"
+. "$XDG_CONFIG_HOME/zsh/cc-functions.zsh"
 . "$XDG_CONFIG_HOME/zsh/colors.zsh"
 . "$XDG_CONFIG_HOME/zsh/docker.sh"
 . "$HOME/.zshrc.local"
 
 # Configure npm to use asdf's Node for global packages
-if command -v npm >/dev/null; then
-    export npm_config_prefix=$(dirname $(dirname $(which node)))
+if command -v asdf >/dev/null; then
+    export npm_config_prefix="$(asdf where nodejs 2>/dev/null)"
 fi
 
+# History configuration
 export HISTSIZE=1000000000
 export SAVEHIST=1000000000
 export HISTFILE=~/.zsh_history
-export HIST_STAMPS="yyyy-mm-dd"
+
+# History options for timestamps and better behavior
+setopt EXTENDED_HISTORY          # Record timestamp of command in history file
+setopt HIST_EXPIRE_DUPS_FIRST    # Delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt HIST_IGNORE_DUPS          # Ignore duplicated commands history list
+setopt HIST_IGNORE_SPACE         # Ignore commands that start with space
+setopt HIST_VERIFY               # Show command with history expansion to user before running it
+setopt INC_APPEND_HISTORY        # Add commands to HISTFILE in order of execution
+setopt SHARE_HISTORY             # Share command history data
 
 
 # homebrew completions
@@ -42,7 +52,7 @@ then
 fi
 
 # Docker CLI completions
-fpath=(/Users/joshukraine/.docker/completions $fpath)
+fpath=($HOME/.docker/completions $fpath)
 
 # Load and initialise completion system with caching for performance
 autoload -Uz compinit
@@ -69,3 +79,7 @@ if command -v gh >/dev/null 2>&1; then
 fi
 
 . "$HOME/.config/zsh/profiler.stop"
+
+# tabtab source for packages
+# uninstall by removing these lines
+[[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true

@@ -8,8 +8,6 @@
 add_newline = false
 command_timeout = 2000
 
-right_format = """$time"""
-
 [package]
 disabled = true
 
@@ -52,7 +50,6 @@ symbol = "󰌠 "
 # disabled = false
 # style = 'cyan'
 # bash_indicator = '\$'
-# fish_indicator = '󰈺'
 # zsh_indicator = '%'
 
 # [os]

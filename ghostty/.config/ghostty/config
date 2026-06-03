@@ -1,14 +1,17 @@
 # To generate a new list of the default values:
-# ghostty +show-config --default --docs > ~/dotfiles/ghostty/config-default
+# ghostty +show-config --default --docs > ~/dotfiles/ghostty/.config/ghostty/config-default
 #
 # Online documentation:
 # https://ghostty.org/docs/config/reference
 
-theme = tokyonight_moon
+theme = TokyoNight Moon
 
 # Font settings
-font-family = Cascadia Code
-font-size = 17
+# List available fonts: ghostty +list-fonts
+# font-family = Cascadia Code
+font-family = Comic Code Ligatures
+font-size = 16
+# font-thicken = true
 adjust-cell-height = 6
 
 # Cursor settings
@@ -36,3 +39,7 @@ keybind = super+ctrl+right=resize_split:right,100
 
 # Reload config
 keybind = super+shift+comma=reload_config
+
+# Load optional local overrides if present (keybinds, fonts, theme).
+# The `?` prefix makes this a no-op when the file doesn't exist.
+config-file = ?~/.config/ghostty/config.local

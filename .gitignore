@@ -2,14 +2,13 @@
 .vimrc.local
 .zshrc.local
 brew/Brewfile.lock.json
-config.fish.local
-fish_variables
-fzf_key_bindings.fish
+ghostty/.config/ghostty/config.local
 kitty.conf.bak
 lazygit/.config/lazygit/state.yml
 local/*
 startup.conf
 tmux/.config/tmux/plugins
+tmux/.config/tmux/tmux.conf.local
 vim/.netrwhist
 vim/bundle
 
@@ -17,6 +16,10 @@ vim/bundle
 !bin/.local/
 !bin/.local/bin/
 !bin/.local/bin/*
+
+# Allow tmp/.stow-local-ignore despite global /tmp/* ignore pattern
+!tmp/
+!tmp/.stow-local-ignore
 
 # Scratchpads for temporary files, notes, and debugging
 scratchpads/
