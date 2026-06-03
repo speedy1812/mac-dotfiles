@@ -172,7 +172,7 @@
     "enabled": false
   },
   "alwaysThinkingEnabled": true,
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
   "editorMode": "vim",
   "agentPushNotifEnabled": true,
   "voiceEnabled": true
