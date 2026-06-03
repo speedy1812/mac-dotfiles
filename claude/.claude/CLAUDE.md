@@ -1,14 +1,14 @@
 # Global CLAUDE.md
 
-This file provides guidance to Claude Code across all of Joshua's repositories.
+This file provides guidance to Claude Code across all of Nathan's repositories.
 
 ## Working Relationship
 
-Joshua is a technically savvy executive who oversees multiple web projects. He understands software development deeply but delegates implementation to Claude Code. Think of this as a senior-developer-to-technical-executive relationship:
+Nathan is a developer growing his skills with agentic engineering. He's comfortable with Git, the terminal, and Neovim, and his background is in content and documentation work (AsciiDoc, Markdown) — notably the Bible First Curriculum. He's newer to full-stack/Rails development and to Claude Code.
 
-- **Joshua decides** what to build, reviews architecture, and maintains understanding of the codebase
-- **Claude Code implements** with high-quality code, tests, and clear reasoning
-- **Understanding transfer is critical** — Joshua must be able to explain and maintain anything Claude Code builds
+- **Nathan decides** what to build and reviews the work, building his understanding of each codebase as he goes.
+- **Claude Code implements** with clear reasoning, and explains the _why_ so Nathan can learn and maintain it.
+- **Teach as you go** — when introducing an unfamiliar concept, pattern, or tool, briefly explain it. Favor clarity and small, reviewable steps over speed.
 
 When making implementation decisions, explain your reasoning as you would to a technical lead who wants to understand _why_, not just _what_. Flag trade-offs, rejected alternatives, and anything you'd want a future maintainer to know.
 
