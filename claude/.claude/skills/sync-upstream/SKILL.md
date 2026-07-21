@@ -45,7 +45,7 @@ Then confirm with Nathan before merging.
 ### 3. Merge
 
 - `git merge upstream/master`.
-- **Clean merge:** skip to step 5.
+- **Clean merge:** still do step 4 (keep-local drift check) — clean merges are exactly where drift hides — then skip to step 6.
 - **Conflicts:** for each conflicted file, in manifest order (keep-local first, generated next, hybrids last):
   1. Show both sides in plain terms — what upstream changed and why (from commit messages), what Nathan's side has.
   2. Propose a resolution per the manifest rule.
@@ -53,19 +53,29 @@ Then confirm with Nathan before merging.
 - Never run `git checkout --ours/--theirs` on a hybrid file; resolve those hunk-by-hunk.
 - If the merge goes sideways, `git merge --abort` restores the pre-sync state — mention this if Nathan seems unsure.
 
-### 4. Complete the merge
+### 4. Keep-local drift check
+
+A clean auto-merge is not the same as "nothing to review." When Nathan's edits and upstream's touch *different lines* of a keep-local file, git merges them silently and the manifest never fires — which is how upstream's personal content can flow into personalized files unnoticed (this happened: Joshua's "Language" section about *his* Ukrainian fluency auto-merged into Nathan's CLAUDE.md).
+
+Before committing the merge, for **every keep-local file in the manifest** — conflicted or not — run `git diff HEAD -- <file>` and check what the merge brought in:
+
+- Nothing changed → fine, move on.
+- Upstream content arrived → summarize it and ask Nathan per item: keep it, drop it, or personalize it (e.g., rewrite a Joshua-specific section for Nathan). Apply his choices and stage the file before the merge commit.
+
+### 5. Complete the merge
 
 Commit with the default merge message (`git commit --no-edit`). Do not squash — merge commits are the record of each sync.
 
-### 5. Verify
+### 6. Verify
 
 - `./scripts/lint-shell`
 - `./scripts/run-tests`
-- If upstream touched `nvim/`, remind Nathan to open Neovim once to confirm plugins load (and re-lock `lazy-lock.json` if it was conflicted).
+- If `lazy-lock.json` changed in the merge, have Nathan run `nvim --headless "+Lazy! restore" +qa` (or `:Lazy restore` inside Neovim) so installed plugin versions match the new pins — merely opening Neovim does nothing. If the lockfile differs afterward (`git status`), commit it as `chore(nvim): re-lock plugins after upstream sync`.
 - If upstream touched `brew/Brewfile`, offer `brew bundle install`.
+- If upstream deleted a package directory, check `$HOME` for dangling stow symlinks to it and offer to remove them.
 - Report failures honestly; don't push with failing tests without asking.
 
-### 6. Debrief
+### 7. Debrief
 
 End with a short plain-language summary — this is the "make sense of the changes" step:
 
