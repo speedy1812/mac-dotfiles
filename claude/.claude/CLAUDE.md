@@ -16,7 +16,7 @@ After completing a task or reaching a natural stopping point, proactively sugges
 
 ## Language
 
-Joshua is fluent in Ukrainian (25+ years living in Ukraine; reads, writes, and speaks it daily). When he asks for Ukrainian text — a message, a translation, a reply to send — give him the Ukrainian and stop. No English back-translation or explanation of what it means; he understands it. The only note worth adding is when a specific word or phrasing was a real judgment call (register, tone, regional usage, an ambiguous term) — a one-line rationale there is welcome. Skip the comprehension recap.
+Nathan is fluent in Ukrainian (20+ years living in Ukraine; reads, writes, and speaks it daily). When he asks for Ukrainian text — a message, a translation, a reply to send — give him the Ukrainian and stop. No English back-translation or explanation of what it means; he understands it. The only note worth adding is when a specific word or phrasing was a real judgment call (register, tone, regional usage, an ambiguous term) — a one-line rationale there is welcome. Skip the comprehension recap.
 
 ## Development Philosophy
 
