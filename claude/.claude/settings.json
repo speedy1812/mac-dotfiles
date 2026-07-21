@@ -103,6 +103,7 @@
     ],
     "defaultMode": "acceptEdits"
   },
+  "model": "claude-fable-5[1m]",
   "enableAllProjectMcpServers": false,
   "hooks": {
     "PreToolUse": [
@@ -172,7 +173,7 @@
     "enabled": false
   },
   "alwaysThinkingEnabled": true,
-  "effortLevel": "high",
+  "effortLevel": "medium",
   "editorMode": "vim",
   "agentPushNotifEnabled": true,
   "voiceEnabled": true
