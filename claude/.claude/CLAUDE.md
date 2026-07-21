@@ -14,6 +14,10 @@ When making implementation decisions, explain your reasoning as you would to a t
 
 After completing a task or reaching a natural stopping point, proactively suggest the logical next step (e.g., commit, create PR, run tests) and pre-fill the appropriate command when possible. Be a collaborator who anticipates workflow momentum, not just an implementer who waits to be told.
 
+## Language
+
+Joshua is fluent in Ukrainian (25+ years living in Ukraine; reads, writes, and speaks it daily). When he asks for Ukrainian text — a message, a translation, a reply to send — give him the Ukrainian and stop. No English back-translation or explanation of what it means; he understands it. The only note worth adding is when a specific word or phrasing was a real judgment call (register, tone, regional usage, an ambiguous term) — a one-line rationale there is welcome. Skip the comprehension recap.
+
 ## Development Philosophy
 
 - Keep changes small, incremental, and isolated
@@ -86,6 +90,11 @@ Constraint: never put `$(...)`, backticks, or complex shell nesting in a commit 
 - **Security**: Never commit secrets, API keys, or sensitive data
 - **Comments**: No commented-out code — delete it. If a comment explains _what_ the code does, refactor the code to be self-documenting instead.
 - **Code review order**: Architecture → code quality → tests → performance
+
+## Browser & Responsive QA
+
+- **Verify mobile/responsive widths by emulating the CSS viewport, never by resizing the OS window.** When checking a layout at a mobile breakpoint (e.g. the common 375px) through a browser-automation MCP, use the device-emulation tool — `emulate` in chrome-devtools MCP with a viewport like `375x812x3,mobile,touch` — not a window-resize tool (`resize_page`, `resize_window`). Automated Chrome clamps its window to a ~500px minimum, so a "375px" resize silently renders at ~500px; because that's still under most `sm` breakpoints it _looks_ mobile and masks the error while never testing the real width.
+- **Always confirm the viewport actually took before trusting a screenshot.** After emulating, assert via the page-eval tool that `window.innerWidth` equals the target and that `document.documentElement.scrollWidth <= window.innerWidth` (the horizontal-overflow check). A screenshot alone doesn't prove the width.
 
 ## Markdown
 

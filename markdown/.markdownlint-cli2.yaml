@@ -7,6 +7,7 @@ gitignore: true
 # Additional ignore patterns
 ignores:
   - "**/scratchpads/**"
+  - "**/tmp/**"
   - "**/node_modules/**"
   - "**/vendor/**"
   - "**/tmux/.config/tmux/plugins/**"
@@ -42,3 +43,20 @@ config:
 
   # MD041/first-line-heading/first-line-h1 : First line in a file should be a top-level heading : https://github.com/DavidAnson/markdownlint/blob/v0.38.0/doc/md041.md
   MD041: false
+
+  # MD049/emphasis-style : Emphasis style : https://github.com/DavidAnson/markdownlint/blob/v0.38.0/doc/md049.md
+  # Standardize italics on underscore — matches Prettier's output and gives visual
+  # distinction from asterisk bold.
+  MD049:
+    style: underscore
+
+  # MD050/strong-style : Strong style : https://github.com/DavidAnson/markdownlint/blob/v0.38.0/doc/md050.md
+  # Standardize bold on asterisk — matches Prettier.
+  MD050:
+    style: asterisk
+
+  # MD060/table-column-style : Table column style : https://github.com/DavidAnson/markdownlint/blob/v0.40.0/doc/md060.md
+  # Disabled: pipe-alignment padding is pure churn on wide tables, and Prettier does
+  # not enforce it — so leaving MD060 on makes the linter fight format-on-save, the
+  # same problem MD049/MD050 exist to solve.
+  MD060: false

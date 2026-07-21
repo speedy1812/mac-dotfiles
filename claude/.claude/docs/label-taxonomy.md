@@ -89,22 +89,40 @@ A unified vocabulary for classifying work across commits, branches, issues, and 
 | `wontfix` | `#FFFFFF` | Reviewed and rejected |
 | `duplicate` | `#CFD3D7` | Duplicate of another issue |
 
+**Workflow labels** (drive the autonomy and QA skill loops):
+
+| Label | Color | Description |
+| --- | --- | --- |
+| `qa` | `#5DBCD2` | Tester-filed QA report — the input to `/qa-triage` and `/qa-triage-batch` |
+| `autopilot-queued` | `#5319E7` | Vetted by `/autopilot-triage` for autonomous resolution; pending an `/autopilot-batch` run |
+
+**Structural labels** (optional, mark an issue's role):
+
+| Label | Color | Description |
+| --- | --- | --- |
+| `epic` | `#7057FF` | Long-running tracking issue for a large feature spanning multiple PRs |
+
+An **epic** is the durable design brief and system of record for a multi-issue feature: it carries the cross-cutting decisions, a phasing plan, and links to its child issues, while the children hold the tactical, PR-sized work. It's applied alongside a type label (usually `feat`) and stays open until the whole feature lands.
+
 ### 4. GitHub Projects Board
 
-**Priority field** (single select):
+The board carries **two independent axes — keep them separate.** Importance is the priority field; sequence/intent is the status column. "I want to do this next" is expressed by moving an issue to **Up Next** and ordering it — _not_ by bumping its priority.
 
-| Priority | Emoji | When to Use |
-| --- | --- | --- |
-| Critical | :red_circle: | Blocking other work or affecting users now |
-| Normal | :yellow_circle: | Standard priority — most issues live here |
-| Low | :green_circle: | Nice to have, do when convenient |
+**Priority field = importance** ("how much it hurts to wait"). A custom Project single-select field (named `Track` on the ComixDistro board) and the **single source of priority truth** — do _not_ also use GitHub's native org-level Priority field (public preview as of 2026-03); two priority fields drift and contradict. Revisit migrating to the native field once it GAs.
 
-**Status columns:**
+| Priority | Emoji | Means | The test |
+| --- | --- | --- | --- |
+| Critical | :red_circle: | Live-user-impacting correctness / security / data-loss, or a hard blocker | "Jump the queue regardless of current interest?" Keep **near-empty**. |
+| Normal | :yellow_circle: | Real work we intend to do — most features and fixes | The default. |
+| Low | :green_circle: | Genuinely deferrable: nice-to-have, icebox, do-if-time | "Fine if it waits a quarter." Not "boring." |
+
+**Status columns = sequence / intent** ("when"):
 
 | Column | What Lives Here |
 | --- | --- |
+| **Parked** | Deliberately idle: waiting on elapsed time or production data (soak / decision issues). _Not_ "blocked." |
 | **Backlog** | Triaged issues not yet scheduled for work |
-| **Up Next** | Committed to for the current or next sprint |
+| **Up Next** | Committed to next; order within the column = sequence |
 | **In Progress** | Actively being worked on (branch exists) |
 | **In Review** | PR open, awaiting review |
 | **Done** | PR merged and issue closed |

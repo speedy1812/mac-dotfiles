@@ -17,7 +17,8 @@ Everything related to spec-driven (PRD-based) development lives in `prd-workflow
 | Document | Purpose | Consult When... |
 | --- | --- | --- |
 | [`label-taxonomy.md`](label-taxonomy.md) | Unified vocabulary for commits, branches, issues, and project boards | Naming a branch, choosing a commit type, setting up GitHub labels |
+| [`model-selection-strategy.md`](model-selection-strategy.md) | Per-issue `model:` label convention — the tiering heuristic, the runbook to adopt it in a repo, and how the autopilot skills consume it | Triaging issues for model tier, adopting the convention in a new repo, changing how autopilot picks a build model |
 
 ## Skills
 
-Custom skills live in `~/.claude/skills/`. See the spec-driven development handbook (§7 "Skills in the Development Cycle") for a full skill map and lifecycle stage guidance.
+Custom skills live in `~/.claude/skills/`. See the spec-driven development handbook — [`spec-driven-development.md`](prd-workflow/spec-driven-development.md) §7 "Skills in the Development Cycle" — for a full skill map and lifecycle stage guidance.

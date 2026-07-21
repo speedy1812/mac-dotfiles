@@ -26,9 +26,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{PROJECT}} — Walkthrough: PR #{{PR}}</title>
-<!-- HOUSE STYLE: inline the <style> block from ../_shared/house-style.html here -->
+<!-- HOUSE STYLE: inline the style block from ../_shared/house-style.html here -->
 </head>
 <body>
+
+<!-- HERO: full-bleed gradient banner — sits BEFORE the .wrap grid. -->
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">{{PROJECT}} · PR Walkthrough</p>
+    <h1>PR #{{PR}}: {{FEATURE}}</h1>
+    <dl class="meta">
+      <dt>Project</dt><dd>{{PROJECT}}</dd>
+      <dt>PR</dt><dd>{{PR_LINK}}</dd>
+      <dt>Branch</dt><dd>{{BRANCH}}</dd>
+      <dt>Commit</dt><dd>{{COMMIT}}</dd>
+      <dt>Date</dt><dd>{{DATE}}</dd>
+      <dt>Estimate</dt><dd>~{{ESTIMATE}} minutes</dd>
+    </dl>
+  </div>
+</header>
+
 <div class="wrap">
 
   <nav class="toc">
@@ -42,22 +59,27 @@
   </nav>
 
   <main>
-    <header class="doc">
-      <p class="eyebrow">{{PROJECT}} · PR Walkthrough</p>
-      <h1>PR #{{PR}}: {{FEATURE}}</h1>
-      <dl class="meta">
-        <dt>Project</dt><dd>{{PROJECT}}</dd>
-        <dt>PR</dt><dd>{{PR_LINK}}</dd>
-        <dt>Branch</dt><dd>{{BRANCH}}</dd>
-        <dt>Commit</dt><dd>{{COMMIT}}</dd>
-        <dt>Date</dt><dd>{{DATE}}</dd>
-        <dt>Estimate</dt><dd>~{{ESTIMATE}} minutes</dd>
-      </dl>
-    </header>
 
-    <!-- PRODUCTION VERIFICATION CALLOUT
-         Include this only when publishing the post-merge version. For a
-         pre-review scratch copy, remove the entire .callout block. -->
+    <!-- LAUNCH-STATUS CALLOUT
+         Post-merge (--publish) only; remove the entire .callout block for the
+         pre-review scratch copy. Choose ONE variant based on the project's
+         CLAUDE.md "QA Testing Policy" launch-status flag (default to the
+         pre-launch variant if no policy is declared):
+
+         PRE-LAUNCH — production verification is fine (prod data is disposable):
+           <div class="callout">
+             <span class="label">Verifying on production?</span>
+             Use the production app and your own account in place of the local
+             server and seed logins below. The steps and expected results are identical.
+           </div>
+
+         POST-LAUNCH — QA is local-dev-only; never run against the live site:
+           <div class="callout">
+             <span class="label">⚠️ Local dev only.</span>
+             Run this walkthrough on a local dev checkout — never against the live
+             site, which holds real data. Use the seed logins below.
+           </div>
+    -->
     <div class="callout">
       <span class="label">Verifying on production?</span>
       Use the production app and your own account in place of the local server
@@ -140,6 +162,6 @@
     </footer>
   </main>
 </div>
-<!-- HOUSE STYLE: inline the <script> block from ../_shared/house-style.html here -->
+<!-- HOUSE STYLE: inline the script block from ../_shared/house-style.html here -->
 </body>
 </html>

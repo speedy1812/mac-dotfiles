@@ -1,8 +1,6 @@
 ---
 name: create-pr
 description: Create a pull request with auto-generated description, issue linking, ROADMAP updates, and PR-metadata validation.
-disable-model-invocation: true
-argument-hint: "[base-branch]"
 ---
 
 # Create Pull Request
@@ -13,7 +11,7 @@ Create a pull request from the current branch with proper formatting and issue l
 
 All flags are optional. By default, the issue number is inferred from the branch name and the PR is created as ready-to-review.
 
-- `--issue N`: Override automatic issue linking with a specific issue number
+- `--issue N`: Override automatic issue linking with a specific issue number (or comma-separated list: `--issue 123,175`)
 - `--skip-issue-link`: Skip issue linking entirely
 - `--draft`: Create PR as draft
 
@@ -46,12 +44,23 @@ All flags are optional. By default, the issue number is inferred from the branch
    - If a matching item exists, mark it complete (`[x]`) and commit the change to the branch before creating the PR
    - If no matching item exists, skip this step
 
-6. **Identify and link related issues**:
-   - **If `--issue N` or issue number provided as argument**: Use "Closes #N" in PR description
-   - **Default (no argument)**: Automatically extract issue number from branch name (`fix/gh-123` → Issue #123). Also check the issue description and any linked issues to ensure ALL related issues are referenced with closing keywords (e.g., "Closes #X, Closes #Y").
-   - **If `--skip-issue-link`**: Skip issue linking entirely
-   - **If no issue number can be determined**: Warn the user and ask whether to proceed without issue linking
-   - **Default format**: Always use "Closes #N" (assume PR fully resolves issue)
+6. **Identify and link related issues** (discover → classify → confirm; don't rely on recall):
+   - **If `--skip-issue-link`**: skip this step entirely.
+   - **Determine the primary issue(s) P:**
+     - `--issue N` (accepts a comma-separated list, e.g. `--issue 123,175`) → use directly as Close targets; skip discovery.
+     - Otherwise extract from the branch name (`fix/gh-123-...` → P=123). If none can be determined, warn and ask whether to proceed with no linking.
+   - **Discover candidates mechanically** (do not depend on having read the issue earlier in the session):
+     - Fetch the primary issue's body and comments: `gh issue view P --json number,title,body,comments`
+     - Extract every `#<number>` reference from that output.
+     - For each referenced issue M, get its state: `gh issue view M --json number,title,state` — drop anything already closed or that is a PR.
+   - **Classify each open candidate by the language around the mention:**
+     - `closes` / `fixes` / `resolves #M`, or M is an unchecked task-list item this PR completes → **Close** (`Closes #M`)
+     - `part of` / `blocked by` / `relates to` / `see` / `parent #M` → **Reference** (`Refs #M`, no closing keyword)
+     - ambiguous → default to **Reference** and flag it
+   - **Confirm before creating the PR:**
+     - Only the primary issue P, no other open candidates → proceed silently with `Closes #P`.
+     - More than one candidate, or any ambiguous one → print a short table (issue · title · proposed Close/Ref) and ask for a one-line confirm/override first.
+   - **Format:** one keyword per line so GitHub parses them all — `Closes #N` per close target, `Refs #N` per reference.
 
 7. **Create the PR**:
    - Use `gh pr create` with generated title and description
@@ -61,6 +70,7 @@ All flags are optional. By default, the issue number is inferred from the branch
 8. **Confirm and validate**:
    - Show PR URL and title
    - Confirm issue linking (e.g., "✅ Linked to issue #123" or "⚠️ No issues linked")
+   - **Cross-check linking:** every Close/Ref target identified in step 6 actually appears in the final description. If one is missing, warn before the PR is considered done (guards against silently dropping a second issue).
    - **Validate PR metadata (warn, don't block):** confirm the title follows Conventional Commits and the description contains a closing keyword (`Closes #N`). If either is missing, surface a warning so it can be fixed before review. (These checks previously lived in the retired `/review-pr`.)
 
 ## PR Description Template
@@ -91,6 +101,9 @@ Closes #123
 
 # Explicit issue linking (when branch name doesn't contain an issue number)
 /create-pr --issue 123
+
+# Explicit multi-issue linking (PR closes more than one issue)
+/create-pr --issue 123,175
 
 # Skip issue linking entirely
 /create-pr --skip-issue-link

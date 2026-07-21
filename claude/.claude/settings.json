@@ -2,7 +2,8 @@
   "cleanupPeriodDays": 365,
   "attribution": {
     "commit": "",
-    "pr": ""
+    "pr": "",
+    "sessionUrl": false
   },
   "permissions": {
     "allow": [
@@ -64,6 +65,10 @@
       "Bash(git switch:*)",
       "Bash(git tag:*)",
       "Bash(gh api:*)",
+      "Bash(gh gist create:*)",
+      "Bash(gh gist edit:*)",
+      "Bash(gh gist list:*)",
+      "Bash(gh gist view:*)",
       "Bash(gh issue:*)",
       "Bash(gh label:*)",
       "Bash(gh pr:*)",
@@ -101,7 +106,7 @@
       "Read(~/.ssh/**)",
       "Read(~/Library/Keychains/**)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "auto"
   },
   "model": "claude-fable-5[1m]",
   "enableAllProjectMcpServers": false,
@@ -174,7 +179,11 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "medium",
+  "tui": "fullscreen",
+  "voice": {
+    "enabled": true
+  },
   "editorMode": "vim",
-  "agentPushNotifEnabled": true,
-  "voiceEnabled": true
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true
 }

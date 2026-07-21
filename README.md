@@ -114,6 +114,8 @@ The dotfiles `setup.sh` script uses [GNU Stow][gnu-stow] to symlink all the conf
 
 The setup script will try to detect and backup these files ahead of Stow, but it's still a good idea to check your `$HOME` directory as well as `$HOME/.config` and `$HOME/.local/bin`.
 
+On a fresh machine, `setup.sh` also pre-creates `~/.claude` as a real directory so Stow links the Claude config files individually instead of folding the whole directory into one symlink (which would route Claude Code's runtime state into the repo). If you forked before this behavior existed and see Claude runtime files appearing in `git status`, see [Troubleshooting: `~/.claude` folding](#troubleshooting-claude-folding).
+
 ### 📍 3. Clone and setup the dotfiles
 
 Clone
@@ -219,12 +221,43 @@ The configuration includes intelligent git functions that automatically detect y
 
 These functions work with both `main` and `master` branch names automatically.
 
+## Staleness Reporting
+
+`bubo` reports what in the environment has drifted, across every surface `setup.sh` installs: Homebrew, Zap and its plugins, tmux/tpm plugins, asdf plugins and tool versions, Neovim/lazy, and Mason. It prints the command to fix anything that is behind.
+
+```bash
+bubo
+```
+
+```text
+tmux plugins (tpm)           2 stale, 2 current
+  tpm                        99469c4 -> e261deb
+  vim-tmux-navigator         c45243d -> e41c431
+  fix: ~/.config/tmux/plugins/tpm/bin/update_plugins all
+
+mason                        4 stale, 33 current
+  registry data: 4h old
+  tree-sitter-cli            v0.26.10 -> v0.26.11
+  fix: nvim +Mason  (then press U)
+```
+
+**It installs and upgrades nothing.** Index and registry refreshes are permitted and unavoidable — `brew update` refreshes the tap index, and lazy fetches — but nothing changes version. Fixing is always a separate, deliberate act. `bubc` upgrades Homebrew; the other fix commands are printed next to whatever needs them.
+
+Everything runs in parallel, because the cost is almost entirely network round trips: the clone probes alone take 4.2s sequentially against 0.6s in parallel. The full report costs about 3s, against 2.5s for the `brew update && brew outdated` that `bubo` used to be.
+
+Two properties are worth knowing, because both were learned from real bugs:
+
+- **A probe that cannot reach the network reports `UNKNOWN`, never "current".** A report that under-reports staleness is worse than no report, because it turns "I don't know" into "you're fine". Same reason a symbolic asdf pin like `stable` reports `UNKNOWN`: it resolves at runtime, so comparing it against a version number is not a comparison.
+- **Clone staleness compares HEAD SHAs**, rather than asking whether the remote HEAD object exists locally. The latter is the obvious check and it silently lies — the object is routinely already in the local store from an earlier fetch even though `HEAD` never moved. It called both `tpm` and `vim-tmux-navigator` current while each sat a commit behind.
+
+That second bug is not hypothetical: a stale Zap plugin clone kept a fixed-upstream bug alive locally for 10 months, and nothing surfaced it.
+
 ## Claude Code
 
 [Claude Code][claude-code] is Anthropic's CLI tool for AI-assisted development. This repo includes a full configuration under the `claude/` directory, stowed to `~/.claude/`.
 
 > [!TIP]
-> Claude Code can also run inside Neovim via the [sidekick.nvim][sidekick-nvim] plugin, which is how I use it most of the time during development.
+> Claude Code pairs well with [Neovim][neovim] via the [sidekick.nvim][sidekick-nvim] plugin, which is how I use it most of the time during development. My preferred layout runs Claude as a sibling tmux pane (60% editor / 40% Claude) rather than nested inside the editor — see **[Claude Code + Neovim][claude-code-neovim]** for the setup, the reasoning, and how sidekick sends editor context across panes.
 
 ### Skills
 
@@ -232,6 +265,9 @@ Custom [skills][agent-skills] provide structured workflows for the full developm
 
 | Skill | Purpose |
 | ----- | ------- |
+| `/autopilot` | Carry one well-scoped issue through the full dev loop autonomously, to a review-ready PR (or merge for small reversible changes) |
+| `/autopilot-batch` | Fan out a queue of issues to parallel worktree subagents, each running `/autopilot`, with an Opus gating review per PR |
+| `/autopilot-triage` | Vet open issues for autonomous resolution and queue the qualifying ones for `/autopilot-batch` |
 | `/bootstrap-prd` | Scaffold PRD-driven development infrastructure into a new project |
 | `/checkpoint` | Quick status update — what's done, in progress, and blocked |
 | `/create-pr` | Create a PR with auto-linked issues and formatted description |
@@ -242,11 +278,13 @@ Custom [skills][agent-skills] provide structured workflows for the full developm
 | `/merge-pr` | Merge a PR with status checks, squash merge, and branch cleanup |
 | `/plan-phase` | Draft implementation plan and create GitHub issues (no code written) |
 | `/prd-view` | Render a PRD Markdown file as a rich HTML reading view in the browser |
-| `/qa-handoff` | Prepare a hands-on QA testing guide for a completed PRD phase |
+| `/qa-handoff` | Prepare a hands-on QA testing guide (Rails apps or static/Hugo sites) for a completed PRD phase |
 | `/qa-triage` | Triage a QA-labeled report, classify it, and draft the technical issue(s) |
+| `/qa-triage-batch` | Fan out `/qa-triage` across the open QA reports, cluster shared root causes across them, and create the tech issues behind one gate |
 | `/readme-refresh` | Audit and update a project README, or bootstrap a new one |
 | `/resolve-issue` | Structured workflow for resolving a GitHub issue end-to-end |
-| `/setup-sprint` | Create parallel Git worktrees for a batch of labeled issues |
+| `/ruby-gc` | Audit asdf-installed Ruby versions against project pins and remove unreferenced ones (dry-run by default) |
+| `/sidecar` | Research-only mode for a secondary session sharing a working dir — no tracked-file edits or git mutations |
 | `/todoist-cli` | Manage Todoist tasks, projects, and labels via the `td` CLI |
 | `/update-deps` | Dependabot-aware dependency updates with security audit, CI validation, and a unified PR |
 | `/walkthrough` | Generate a browser walkthrough of a PR's user-facing changes |
@@ -290,8 +328,36 @@ See `zsh/.config/zsh-abbr/abbreviations.zsh` for the full set (`clsp`, `clh`, `c
 ### Other Configuration
 
 - **`CLAUDE.md`** — Global development philosophy and coding standards applied across all projects
-- **`cheatsheet.md`** — Quick reference for keyboard shortcuts, commands, and context management tips
+- **[`cheatsheet.md`][cheatsheet]** — Quick reference for keyboard shortcuts (including fullscreen scrolling and custom keybindings), commands, and context management tips
 - **`starship.toml`** — Custom [Starship prompt][starship-claude] showing model, context window status, and token cost
+
+### Troubleshooting: `~/.claude` folding
+
+`setup.sh` creates `~/.claude` as a real directory before stowing, so a fresh install links the Claude config files individually. If you cloned **before** that fix landed, you may have a _folded_ `~/.claude` — a single symlink pointing back into the repo — which makes Claude Code write its runtime state (`sessions/`, `projects/`, `history.jsonl`, …) straight into your dotfiles. The tells: a flood of untracked `claude/.claude/…` entries in `git status`, and `ls -ld ~/.claude` showing a symlink (`lrwx…`) rather than a directory (`drwx…`).
+
+To repair an already-folded `~/.claude`, quit all `claude` sessions and run:
+
+```bash
+cd ~/dotfiles
+
+stow -D claude/                                  # detach the folded ~/.claude symlink
+mkdir -p ~/.claude                               # recreate it as a real directory
+
+git restore --staged claude/.claude/             # unstage anything Claude's writes added
+git restore claude/.claude/settings.json         # discard Claude's auto-edit, if present
+git clean -fd claude/.claude/                    # delete the leaked runtime state
+
+stow claude/                                     # re-link only the managed config
+```
+
+Then confirm the result:
+
+```bash
+ls -ld ~/.claude               # expect a real directory (drwx…), not a symlink (lrwx…)
+ls -la ~/.claude | grep ' -> ' # expect exactly: CLAUDE.md, settings.json, starship.toml, skills, docs, presets
+```
+
+If a stray symlink such as `sessions` still points into the repo, remove just that link (`rm ~/.claude/sessions`) and re-run the `git clean` above so a later `stow -R` can't fold it back.
 
 ## About Neovim Distributions
 
@@ -479,6 +545,37 @@ Local customizations should be placed in `*.local` files:
 - `~/.laptop.local` - Additional laptop setup customizations
 - `~/.config/ghostty/config.local` - Personal ghostty overrides (keybinds, fonts, theme)
 - `~/.config/tmux/tmux.conf.local` - Personal tmux overrides (extra plugins, key bindings, options)
+- `~/.config/tmux/project-accent.local.sh` - Per-project status bar accent colors (see below)
+
+### Per-project tmux accent
+
+When several projects are open at once — one tmux session each, created with [`tat`](bin/.local/bin/tat) — the status bar can be color-coded per project so they're easy to tell apart. Both ends of the bar are accented: the session-name "pill" on the left and the hostname pill on the right, giving a matching color band on each side that's easy to catch at a glance. Sessions without a mapping keep the theme's default blue, so this is a no-op until you opt in.
+
+To enable it, copy the example map and edit it:
+
+```sh
+cd ~/.config/tmux
+cp project-accent.local.sh.example project-accent.local.sh
+$EDITOR project-accent.local.sh
+```
+
+Map each session to a color in the `accent_for` function, keyed by the tmux session name (the `#S` shown in the pill):
+
+```sh
+accent_for() {
+  case "$1" in
+    my-work-app) printf '%s' "#ff966c" ;;  # orange
+    my-side-proj) printf '%s' "#c3e88d" ;; # green
+    *) printf '%s' "" ;;
+  esac
+}
+```
+
+Colors can be hex (`#rrggbb`), a named color (`red`), or `colour0`–`colour255`. The real `project-accent.local.sh` is gitignored, so your project names and color choices never leave your machine.
+
+> **Note:** the lookup key is the **tmux session name**, not the directory path. With [`tat`](bin/.local/bin/tat) the session name is the current directory's basename with dots converted to dashes (a `foo.bar` directory becomes session `foo-bar`), so map it as `foo-bar`. Keying on the session name lets two checkouts that share a directory name (e.g. `bfo1` and `bfo2`) still get distinct colors.
+
+Colors apply automatically to new sessions (via a `session-created` hook) and backfill existing sessions whenever tmux is reloaded. The color is driven entirely by the `@accent` user option, which the theme renders into both pills; if you switch away from TokyoNight Moon, parameterize the new theme's pills with `#{@accent}` — see the comments in `~/.config/tmux/themes/tokyonight_moon.tmux`.
 
 ## License
 
@@ -492,7 +589,9 @@ Copyright &copy; 2014–2026 Joshua Steele. [MIT License][license]
 [asdf]: https://asdf-vm.com/
 [bats]: https://github.com/bats-core/bats-core
 [claude-code]: https://docs.anthropic.com/en/docs/claude-code/overview
+[claude-code-neovim]: claude/claude-code-neovim.md
 [cascadia-code]: https://github.com/microsoft/cascadia-code
+[cheatsheet]: claude/.claude/cheatsheet.md
 [checkhealth]: https://neovim.io/doc/user/pi_health.html#:checkhealth
 [comic-code]: https://tosche.net/fonts/comic-code
 [coreutils]: https://formulae.brew.sh/formula/coreutils

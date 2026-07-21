@@ -9,8 +9,15 @@ alias vim='nvim'
 alias history='fc -li 1'
 
 # ls > eza
-# Other aliases handled by exa plugin (uses eza under the hood)
+# Other aliases (ll, la, tree) handled by the exa plugin (uses eza under the hood).
 # https://github.com/zap-zsh/exa
+# Pin `ls` ourselves rather than inherit it. A bare `--icons` takes an optional
+# value, so it swallows a following path (`ls /tmp` -> error); `=auto` is the same
+# default, stated explicitly. Upstream fixed this the same way in be8371b (Sep 2025),
+# but zap never updates a cloned plugin, so a stale clone reintroduces the bug — this
+# pin holds regardless of the plugin's version. Sourced after plugins.zsh, and zsh
+# resolves aliases at use time, so ll/la/tree inherit it too.
+alias ls='eza --group-directories-first --icons=auto'
 
 # Middleman
 alias mma='bundle exec middleman article'
