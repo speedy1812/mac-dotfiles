@@ -37,7 +37,7 @@ brew "fontforge"
 brew "fonttools"
 brew "fzf"
 brew "gh"
-brew "ghostscript"
+# brew "ghostscript"
 brew "gifsicle"
 brew "git"
 brew "git-quick-stats"
@@ -90,7 +90,7 @@ brew "shfmt"
 brew "ssh-copy-id"
 brew "starship"
 brew "stow"
-brew "tealdeer"
+# brew "tealdeer"
 brew "telnet"
 brew "the_silver_searcher"
 brew "trash"
@@ -163,7 +163,7 @@ cask "loom"
 # mas "Marked 2", id: 890031187
 # mas "Numbers", id: 361304891
 # mas "Pages", id: 361309726
-mas "The Unarchiver", id: 425424353
+# mas "The Unarchiver", id: 425424353
 mas "Toggl Track", id: 1291898086
 
 # vim: set filetype=ruby:
