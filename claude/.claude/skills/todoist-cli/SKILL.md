@@ -5,7 +5,7 @@ compatibility: "Requires the td CLI (@doist/todoist-cli) to be installed and aut
 license: MIT
 metadata:
   author: Doist
-  version: "1.75.2"
+  version: "3.0.5"
 ---
 
 # Todoist CLI (td)
@@ -93,7 +93,6 @@ Resolution order: `--user <ref>` > `user.defaultUser` from config > the only sto
 - Task lifecycle: `td task list/view/add/quickadd/update/reschedule/move/complete/uncomplete/delete/browse` (alias: `td task qa` for `quickadd`)
 - Projects: `td project list/view/create/update/archive/unarchive/archived/delete/move/reorder/join/share/browse/collaborators/permissions`
 - Project analytics: `td project progress/health/health-context/activity-stats/analyze-health`
-- Goals: `td goal list/view/create/update/delete/complete/uncomplete/link/unlink`
 - Organization: `td label ...`, `td filter ...`, `td section ...`, `td folder ...`, `td workspace ...`
 - Collaboration: `td comment ...`, `td notification ...`, `td reminder ...`
 - Templates and files: `td template ...`, `td attachment view <file-url>`, `td backup ...`
@@ -106,7 +105,6 @@ Resolution order: `--user <ref>` > `user.defaultUser` from config > the only sto
 ## References
 
 Tasks, projects, labels, and filters can be referenced by:
-
 - Name (fuzzy matched within context)
 - `id:xxx` - Explicit ID
 - Todoist URL - Paste directly from the web app (e.g., `https://app.todoist.com/app/task/buy-milk-8Jx4mVr72kPn3QwB` or `https://app.todoist.com/app/project/work-2pN7vKx49mRq6YhT`)
@@ -118,7 +116,6 @@ Reminder commands that take an ID (`reminder get/update/delete`, `reminder locat
 ## Commands
 
 ### Daily Views
-
 ```bash
 td today
 td inbox --priority p1
@@ -129,7 +126,6 @@ td activity --type task --event completed
 ```
 
 ### Tasks
-
 ```bash
 td task add "Buy milk" --due tomorrow
 td task quickadd "Buy milk tomorrow p1 #Shopping"
@@ -147,7 +143,6 @@ td task browse "Plan sprint"
 ```
 
 Choosing between `task add` and `task quickadd`:
-
 - `td task quickadd` (alias `td task qa`) uses Todoist's natural-language parser. Inline syntax covers dates ("tomorrow at 2pm"), priority (`p1`–`p4`), project (`#Project`), labels (`@label`), sections (`/Section`), and assignee (`+Person` on shared projects). **Prefer `quickadd` when all task attributes can be expressed inline and you do not need to set additional structured fields** — it's one call and no name-resolution lookups are required.
 - Use `td task add` when you need flags that Quick Add syntax can't express (`--deadline`, `--description`, `--parent`, `--duration`, `--uncompletable`, `--order`), when the text is being composed programmatically, or when you need explicit `id:` / URL references for project/section/parent.
 - `td task quickadd` supports `--stdin`, `--json`, and `--dry-run` only; everything else is embedded in the text.
@@ -155,13 +150,11 @@ Choosing between `task add` and `task quickadd`:
 - `--due` on `task add` / `task update` is **sent verbatim** to the API as `due_string` — the CLI does not parse or rewrite it. The server's `due_string` parser handles simple inputs ("2026-06-01", "tomorrow", "every Monday") but does **not** unpack some more complex clauses (i.e. `starting <date>`).
 
 Useful task flags:
-
 - `--stdin` on `task add` reads the task description from stdin; on `task quickadd` (and the top-level `td add`) it reads the full natural-language text from stdin.
 - `--parent`, `--section`, `--project`, `--workspace`, `--assignee`, `--labels`, `--due`, `--deadline`, `--duration`, and `--priority` cover most task workflows.
 - `td task complete --forever` stops recurrence; `td task update --no-due` clears the due date, `--no-deadline` clears deadlines, and `--no-labels` removes all labels; `td task move --no-parent` and `--no-section` detach from hierarchy.
 
 ### Projects And Workspaces
-
 ```bash
 td project list --personal
 td project list --search "Road"
@@ -223,7 +216,6 @@ td folder delete "Engineering" --workspace "Acme" --yes
 ```
 
 ### Labels, Filters, And Sections
-
 ```bash
 td label list
 td label list --search "bug"
@@ -263,28 +255,7 @@ td section browse id:123
 
 Shared labels can appear in `td label list` and `td label view`, but standard update and delete actions only work for labels with IDs. Use `td label rename-shared` and `td label remove-shared` for shared labels.
 
-### Goals
-
-```bash
-td goal list                                 # List all accessible goals
-td goal list --workspace "Work"              # Filter to workspace goals
-td goal view "Ship v2"                       # View goal details and linked tasks
-td goal create --name "Ship v2"              # Create personal goal
-td goal create --name "Ship v2" --workspace "Work"  # Create workspace goal
-td goal create --name "Ship v2" --deadline "2026-04-03"
-td goal create --name "Ship v2" --json       # Return created goal as JSON
-td goal create --name "Ship v2" --dry-run    # Preview creation
-td goal update "Ship v2" --name "Ship v3"
-td goal update "Ship v2" --description "New desc" --json
-td goal delete "Ship v2" --yes
-td goal complete "Ship v2"                   # Mark goal as completed
-td goal uncomplete "Ship v2"                 # Reopen a completed goal
-td goal link "Ship v2" --task "Buy milk"     # Link a task to a goal
-td goal unlink "Ship v2" --task "Buy milk"   # Unlink a task from a goal
-```
-
 ### Comments, Attachments, Notifications, And Reminders
-
 ```bash
 td comment list "Plan sprint"
 td comment list "Roadmap" --project
@@ -321,7 +292,6 @@ td reminder location get id:456
 `td comment view` flags image attachments with a `Hint` line pointing at `td attachment view`. In `--json` mode the hint is written to stderr so stdout stays parseable — watch the tool output, not just the JSON body.
 
 ### Help Center
-
 ```bash
 td hc
 td hc --help
@@ -333,7 +303,6 @@ td hc view https://www.todoist.com/help/articles/introduction-to-filters-V98wIH
 `td hc` queries the Todoist online Help Center. Run `td hc --help` for locale discovery, article search, and article viewing details. `td hc locale --set-default <locale>` persists a preferred locale in `~/.config/todoist-cli/config.json` under `hc.defaultLocale`; the `--locale` flag on individual subcommands still overrides it. `td hc view` accepts `id:N`, raw numeric article IDs, `get.todoist.help` URLs, and public `www.todoist.com/help/articles/...` marketing URLs (resolved to the underlying Zendesk article via slug search).
 
 ### Templates
-
 ```bash
 td template export-file "Roadmap" --output template.csv
 td template export-url "Roadmap"
@@ -345,7 +314,6 @@ td template import-id "Roadmap" --template-id product-launch --locale fr
 ```
 
 ### Backups
-
 ```bash
 td backup list
 td backup download "2024-01-15_12:00" --output-file backup.zip
@@ -354,7 +322,6 @@ td backup download "2024-01-15_12:00" --output-file backup.zip
 The `backup` command surface requires the `backups:read` OAuth scope — re-run `td auth login --additional-scopes=backups` to grant it. Without the scope, calls fail with an `AUTH_ERROR` whose hint preserves any previously used flags (e.g. a read-only user sees `td auth login --read-only --additional-scopes=backups`).
 
 ### Developer Apps
-
 ```bash
 td apps list
 td apps list --json
@@ -364,8 +331,12 @@ td apps view 9909
 td apps view id:9909 --json
 td apps view id:9909 --include-secrets
 td apps view id:9909 --json --include-secrets
+td apps update id:9909 --name "My Renamed App"
+td apps update id:9909 --description "Does a useful thing"
 td apps update id:9909 --add-oauth-redirect https://example.com/callback
 td apps update id:9909 --remove-oauth-redirect https://example.com/callback --yes
+td apps update id:9909 --set-webhook-url https://example.com/webhook
+td apps update id:9909 --name "My App" --description "New blurb" --set-webhook-url https://example.com/webhook
 td apps delete id:9909 --yes
 ```
 
@@ -375,14 +346,21 @@ The `apps` command surface manages the user's registered Todoist developer apps 
 
 `td apps view <ref>` accepts a name (fuzzy/case-insensitive), `id:N`, or a raw numeric id. Plain output shows display name as a header, then a labelled key/value block (id, status, users, created date, service URL, OAuth redirect, token scopes, icon URL, client id) followed by the description. Webhook configuration is always fetched (`getAppWebhook` — callback URL is user-supplied, not a secret). When the app has UI extensions, a `UI extensions:` section lists each one as `<name> (<type>[: <sub-type>])` (type is `context-menu`/`composer`/`settings`; sub-type is the `context-menu` context `project`/`task` or the `composer` location `task`/`comment`), followed by an `Install URL:` line (`https://app.todoist.com/app/install/<distribution_token>`) — the link shared so others can install the integration. In `--json` / `--ndjson` the payload always carries `uiExtensions`, `distributionToken`, and `installUrl` (the last is `null` when there are no UI extensions). When `--include-secrets` is set, the command additionally fetches the app's secrets (`client_secret`), verification token, and test token.
 
-`td apps update <ref> --add-oauth-redirect <url>` appends an OAuth redirect URI to the app, and `--remove-oauth-redirect <url>` takes one off (requires `--yes` to actually mutate, like `td task delete`). The two flags are mutually exclusive — pass one at a time. The URI is validated before any API call: `https://<host>`, `http(s)://localhost[:port][/path]`, `http(s)://127.0.0.1[:port][/path]`, or a custom-scheme URI (e.g. `myapp://callback`) are accepted; `javascript`, `data`, `file`, `vbscript`, and `ftp` custom schemes are rejected. Removals skip validation so users can clean up legacy malformed URIs. Adding a URI already set on the app fails with `ALREADY_EXISTS`; removing a URI that isn't on the app exits 0 with a message and makes no API call. Supports `--dry-run` and `--json`.
+All `td apps update` flags combine in a single invocation, which performs up to two API calls: an app-record patch (`updateApp`, carrying any of display name, description, OAuth redirect URIs) followed by a webhook URL swap (`updateAppWebhook`, a separate endpoint). The record patch runs first; if it succeeds and the webhook call then fails, the record change stays persisted (no rollback). Passing no flags errors with `NO_CHANGES`. The only mutually-exclusive pair is `--add-oauth-redirect` + `--remove-oauth-redirect` (they read-modify-write the same field) → `CONFLICTING_OPTIONS`.
+
+`--name <name>` sets the app's display name (SDK `displayName`) and `--description <description>` sets its description; an empty `--description ""` clears the description, while an empty/whitespace `--name` is rejected with `INVALID_OPTIONS`.
+
+`--add-oauth-redirect <url>` appends an OAuth redirect URI to the app, and `--remove-oauth-redirect <url>` takes one off (requires `--yes` to actually mutate, like `td task delete`). The URI is validated before any API call: `https://<host>`, `http(s)://localhost[:port][/path]`, `http(s)://127.0.0.1[:port][/path]`, or a custom-scheme URI (e.g. `myapp://callback`) are accepted; `javascript`, `data`, `file`, `vbscript`, and `ftp` custom schemes are rejected. Removals skip validation so users can clean up legacy malformed URIs. Adding a URI already set on the app fails with `ALREADY_EXISTS`; removing a URI that isn't on the app is a no-op (message, no API call). A real removal gates the whole invocation: without `--yes` nothing is performed (plain output prints a batch "would update" preview; `--json` throws `CONFIRMATION_REQUIRED`), so any name/description/webhook change in the same command is withheld too.
+
+`--set-webhook-url <url>` swaps the callback URL on the app's existing webhook. The webhook holds a single URL, so this is a straight set; the current webhook's event list and version are read (`getAppWebhook`) and preserved — only the URL changes. It errors with `NO_WEBHOOK` if the app has no webhook configured yet (a webhook must exist before its URL can be changed, since creating one needs an event list). The URL must be a public `https://<host>` URL. Setting the URL to the value already configured is a no-op (message, no API call).
+
+`--dry-run` prints one combined preview of every pending change. `--json` output shape depends on which surfaces the flags touched: a lone app-record change emits the bare app object, a lone webhook change emits the bare webhook object, and touching both emits `{ "app": <app>, "webhook": <webhook> }`.
 
 `td apps delete <ref>` deletes a registered app (resolved by name, `id:N`, or raw numeric id). **This is destructive and irreversible: deleting an app immediately breaks it for everyone who uses it — any user who authorized the integration loses access, and the app cannot be restored. Always confirm with the user that they are sure before running with `--yes`.** It requires `--yes` to actually delete; without it the command prints a `Would delete app: …` preview and makes no API call (same convention as `td folder delete` / `td workspace delete`). `--dry-run` prints the standard dry-run preview.
 
 The OAuth `client_id` is **public** and always shown. The distribution token is **not** a secret (it is a shareable install link): in plain output it surfaces only via the `Install URL` line, which appears only when the app has UI extensions; in `--json` / `--ndjson` the `distributionToken` key is always present. The three sensitive credentials — client secret, verification token, test access token — are **hidden by default**. In plain mode each of those lines renders a `(hidden — pass --include-secrets to reveal)` hint; in `--json` / `--ndjson` the `clientSecret`, `verificationToken`, and `testToken` keys are omitted from the payload entirely. With `--include-secrets`, the values are rendered / emitted normally — in that mode a non-existent test token reads as `(not created)`. Webhook configuration is always included when configured (callback URL, event list, version); a missing webhook renders as `(not configured)` in plain output and `null` in JSON.
 
 ### Billing
-
 ```bash
 td billing                       # subscription (default subcommand)
 td billing subscription --json
@@ -396,7 +374,6 @@ The `billing` command surface is **read-only** and requires the `billing` OAuth 
 `td billing subscription` (the default subcommand) shows the current plan, status, activation method, expiration date, plan price, invoice credit balance, and billing-portal URLs when present. `td billing plan` shows Pro plan status, downgrade date, and the per-cycle price list. `td billing prices` lists available Pro and Teams prices by billing cycle. `td billing pricing` shows current and legacy pricing keyed by version; `--formatted` returns localized price strings instead of minor-unit numbers.
 
 ### Settings, Stats, And Utilities
-
 ```bash
 td stats
 td stats goals --daily 10 --weekly 50
