@@ -55,9 +55,9 @@ Then confirm with Nathan before merging.
 
 ### 4. Drift check
 
-A clean auto-merge is not the same as "nothing to review." When Nathan's edits and upstream's touch *different lines* of a file, git merges them silently and the manifest never fires. Both halves of this check run before the merge commit, conflicted or not — clean merges are exactly where drift hides.
+A clean auto-merge is not the same as "nothing to review." When Nathan's edits and upstream's touch _different lines_ of a file, git merges them silently and the manifest never fires. Both halves of this check run before the merge commit, conflicted or not — clean merges are exactly where drift hides.
 
-**Keep-local files.** Upstream's personal content can flow into personalized files unnoticed (this happened: Joshua's "Language" section about *his* Ukrainian fluency auto-merged into Nathan's CLAUDE.md). For every keep-local file in the manifest, run `git diff HEAD -- <file>`:
+**Keep-local files.** Upstream's personal content can flow into personalized files unnoticed (this happened: Joshua's "Language" section about _his_ Ukrainian fluency auto-merged into Nathan's CLAUDE.md). For every keep-local file in the manifest, run `git diff HEAD -- <file>`:
 
 - Nothing changed → fine, move on.
 - Upstream content arrived → summarize it and ask Nathan per item: keep it, drop it, or personalize it (e.g., rewrite a Joshua-specific section for Nathan). Apply his choices and stage the file before the merge commit.
@@ -101,4 +101,4 @@ The manifest must track reality. After any sync where:
 - a conflict appeared in an uncategorized file, or
 - Nathan overrode a manifest rule,
 
-update the manifest table in this SKILL.md (with his confirmation) as part of the same session, and include it in a commit. The manifest doubles as documentation of what this fork *is* — the intentional delta from Joshua's repo.
+update the manifest table in this SKILL.md (with his confirmation) as part of the same session, and include it in a commit. The manifest doubles as documentation of what this fork _is_ — the intentional delta from Joshua's repo.

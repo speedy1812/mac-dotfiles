@@ -105,6 +105,7 @@ Resolution order: `--user <ref>` > `user.defaultUser` from config > the only sto
 ## References
 
 Tasks, projects, labels, and filters can be referenced by:
+
 - Name (fuzzy matched within context)
 - `id:xxx` - Explicit ID
 - Todoist URL - Paste directly from the web app (e.g., `https://app.todoist.com/app/task/buy-milk-8Jx4mVr72kPn3QwB` or `https://app.todoist.com/app/project/work-2pN7vKx49mRq6YhT`)
@@ -116,6 +117,7 @@ Reminder commands that take an ID (`reminder get/update/delete`, `reminder locat
 ## Commands
 
 ### Daily Views
+
 ```bash
 td today
 td inbox --priority p1
@@ -126,6 +128,7 @@ td activity --type task --event completed
 ```
 
 ### Tasks
+
 ```bash
 td task add "Buy milk" --due tomorrow
 td task quickadd "Buy milk tomorrow p1 #Shopping"
@@ -143,6 +146,7 @@ td task browse "Plan sprint"
 ```
 
 Choosing between `task add` and `task quickadd`:
+
 - `td task quickadd` (alias `td task qa`) uses Todoist's natural-language parser. Inline syntax covers dates ("tomorrow at 2pm"), priority (`p1`–`p4`), project (`#Project`), labels (`@label`), sections (`/Section`), and assignee (`+Person` on shared projects). **Prefer `quickadd` when all task attributes can be expressed inline and you do not need to set additional structured fields** — it's one call and no name-resolution lookups are required.
 - Use `td task add` when you need flags that Quick Add syntax can't express (`--deadline`, `--description`, `--parent`, `--duration`, `--uncompletable`, `--order`), when the text is being composed programmatically, or when you need explicit `id:` / URL references for project/section/parent.
 - `td task quickadd` supports `--stdin`, `--json`, and `--dry-run` only; everything else is embedded in the text.
@@ -150,11 +154,13 @@ Choosing between `task add` and `task quickadd`:
 - `--due` on `task add` / `task update` is **sent verbatim** to the API as `due_string` — the CLI does not parse or rewrite it. The server's `due_string` parser handles simple inputs ("2026-06-01", "tomorrow", "every Monday") but does **not** unpack some more complex clauses (i.e. `starting <date>`).
 
 Useful task flags:
+
 - `--stdin` on `task add` reads the task description from stdin; on `task quickadd` (and the top-level `td add`) it reads the full natural-language text from stdin.
 - `--parent`, `--section`, `--project`, `--workspace`, `--assignee`, `--labels`, `--due`, `--deadline`, `--duration`, and `--priority` cover most task workflows.
 - `td task complete --forever` stops recurrence; `td task update --no-due` clears the due date, `--no-deadline` clears deadlines, and `--no-labels` removes all labels; `td task move --no-parent` and `--no-section` detach from hierarchy.
 
 ### Projects And Workspaces
+
 ```bash
 td project list --personal
 td project list --search "Road"
@@ -216,6 +222,7 @@ td folder delete "Engineering" --workspace "Acme" --yes
 ```
 
 ### Labels, Filters, And Sections
+
 ```bash
 td label list
 td label list --search "bug"
@@ -256,6 +263,7 @@ td section browse id:123
 Shared labels can appear in `td label list` and `td label view`, but standard update and delete actions only work for labels with IDs. Use `td label rename-shared` and `td label remove-shared` for shared labels.
 
 ### Comments, Attachments, Notifications, And Reminders
+
 ```bash
 td comment list "Plan sprint"
 td comment list "Roadmap" --project
@@ -292,6 +300,7 @@ td reminder location get id:456
 `td comment view` flags image attachments with a `Hint` line pointing at `td attachment view`. In `--json` mode the hint is written to stderr so stdout stays parseable — watch the tool output, not just the JSON body.
 
 ### Help Center
+
 ```bash
 td hc
 td hc --help
@@ -303,6 +312,7 @@ td hc view https://www.todoist.com/help/articles/introduction-to-filters-V98wIH
 `td hc` queries the Todoist online Help Center. Run `td hc --help` for locale discovery, article search, and article viewing details. `td hc locale --set-default <locale>` persists a preferred locale in `~/.config/todoist-cli/config.json` under `hc.defaultLocale`; the `--locale` flag on individual subcommands still overrides it. `td hc view` accepts `id:N`, raw numeric article IDs, `get.todoist.help` URLs, and public `www.todoist.com/help/articles/...` marketing URLs (resolved to the underlying Zendesk article via slug search).
 
 ### Templates
+
 ```bash
 td template export-file "Roadmap" --output template.csv
 td template export-url "Roadmap"
@@ -314,6 +324,7 @@ td template import-id "Roadmap" --template-id product-launch --locale fr
 ```
 
 ### Backups
+
 ```bash
 td backup list
 td backup download "2024-01-15_12:00" --output-file backup.zip
@@ -322,6 +333,7 @@ td backup download "2024-01-15_12:00" --output-file backup.zip
 The `backup` command surface requires the `backups:read` OAuth scope — re-run `td auth login --additional-scopes=backups` to grant it. Without the scope, calls fail with an `AUTH_ERROR` whose hint preserves any previously used flags (e.g. a read-only user sees `td auth login --read-only --additional-scopes=backups`).
 
 ### Developer Apps
+
 ```bash
 td apps list
 td apps list --json
@@ -361,6 +373,7 @@ All `td apps update` flags combine in a single invocation, which performs up to 
 The OAuth `client_id` is **public** and always shown. The distribution token is **not** a secret (it is a shareable install link): in plain output it surfaces only via the `Install URL` line, which appears only when the app has UI extensions; in `--json` / `--ndjson` the `distributionToken` key is always present. The three sensitive credentials — client secret, verification token, test access token — are **hidden by default**. In plain mode each of those lines renders a `(hidden — pass --include-secrets to reveal)` hint; in `--json` / `--ndjson` the `clientSecret`, `verificationToken`, and `testToken` keys are omitted from the payload entirely. With `--include-secrets`, the values are rendered / emitted normally — in that mode a non-existent test token reads as `(not created)`. Webhook configuration is always included when configured (callback URL, event list, version); a missing webhook renders as `(not configured)` in plain output and `null` in JSON.
 
 ### Billing
+
 ```bash
 td billing                       # subscription (default subcommand)
 td billing subscription --json
@@ -374,6 +387,7 @@ The `billing` command surface is **read-only** and requires the `billing` OAuth 
 `td billing subscription` (the default subcommand) shows the current plan, status, activation method, expiration date, plan price, invoice credit balance, and billing-portal URLs when present. `td billing plan` shows Pro plan status, downgrade date, and the per-cycle price list. `td billing prices` lists available Pro and Teams prices by billing cycle. `td billing pricing` shows current and legacy pricing keyed by version; `--formatted` returns localized price strings instead of minor-unit numbers.
 
 ### Settings, Stats, And Utilities
+
 ```bash
 td stats
 td stats goals --daily 10 --weekly 50
