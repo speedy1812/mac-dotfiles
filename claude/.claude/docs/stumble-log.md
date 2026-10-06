@@ -1,0 +1,66 @@
+# Stumble Log
+
+Running record of places where Claude got something wrong that a removed instruction would have prevented. **This log is the only admissible evidence for re-adding anything to a `CLAUDE.md` file** (decision D1 on joshukraine/dotfiles#252).
+
+## Why this exists
+
+The ablation method only works if the observation half actually happens. Cutting instructions and then re-adding them from memory or intuition reproduces the original file — the whole point is to let reality decide. So: cut in one pass, work normally, write down every stumble, and re-add only what earns it.
+
+## How to use it
+
+**For Claude:** when you realize you did something Joshua had to correct — and a line that used to be in a `CLAUDE.md` would have prevented it — append a row before moving on. Do this unprompted; it is part of finishing the task. Do not re-add the instruction yourself.
+
+**For Joshua:** when you catch yourself giving a correction you feel like you've given before, add a row (or tell Claude to). The "again?" feeling is the signal.
+
+**Rules:**
+
+- One row per incident, not per category. Three separate wrong-branch-prefix incidents are three rows.
+- Record what _actually happened_, not the instruction you wish existed. The fix column is a hypothesis.
+- **Do not re-add during the observation window** (Phase 2, now running through **2026-10-16** — see [Observation window](#observation-window) below). Log and keep going. Re-adds happen in one deliberate Phase 3 pass.
+- **Exception — command bugs get fixed on the spot, not logged and endured.** Decision D7 on #252: when a skill hands over a command that is incomplete for the job it describes, the instruction _introduces_ the gap rather than failing to prevent one, and no amount of model capability closes it. Test: _if the model followed this line perfectly, would it still get the wrong result?_ If yes, fix it now — that is not a re-add. Log it anyway, so the method keeps its record.
+- A line comes back only if it appears here **more than once**. Single incidents are noise.
+- Re-add at the narrowest scope that fixes it: skill > project `CLAUDE.md` > global.
+- **Tag rows that happened during atypical work** — travel, short sessions, cold re-entry into a project untouched for a week. Phase 3 weighs a stumble differently depending on whether it surfaced during normal throughput.
+
+## Observation window
+
+| | |
+| --- | --- |
+| Opened | 2026-08-01 — Phase 1 merge (#253) |
+| Closes | **2026-10-16** (end of day) |
+
+Originally ~2 weeks, closing 2026-08-15. Extended on 2026-08-12, because the original window would have measured almost nothing: Joshua left on 2026-08-04 for a trip to the States and returns 2026-09-09, with work volume in the interval a fraction of normal. That leaves roughly **three days** of representative work behind the window's evidence, not two weeks — and the single logged entry so far came from day one.
+
+The distortion is not only that there is less work. Travel work is a different _shape_: short sessions and cold re-entry make some stumble classes more likely, while the watch-list items that need long implementation sessions to surface at all — doc drift, large unreviewed diffs — cannot fire. The sample is skewed in both directions at once, which is worse than simply being small.
+
+The new date allows roughly two and a half weeks of normal-volume work after the return. Travel-period entries still count; tag them per the rules above and let Phase 3 weigh them.
+
+**Extended again on 2026-09-29, through 2026-10-16.** The 9/26 date assumed the 2.5 weeks after the return would be normal-volume work. They weren't: use stayed light, so the zero-stumble result mostly reflects a config that went largely unexercised, not one that held up. A heavy development session starts today, 9/29. The new close date is the last working day before Joshua leaves on 2026-10-17 for the Hugo project, after which there will be a couple of weeks with no serious development. That gives about 2.5 weeks of real daily use. Rows logged before 9/29 count as light-use evidence.
+
+**Frozen until 2026-09-09:** Phase 4 (responsive-QA → skill) and Phase 6 (ComixDistro's repeated CI-ordering rationale). Both change live config, and config surgery on a single travelling machine is a bad trade against signal this weak.
+
+## Log
+
+| Date | Repo | What happened | Candidate fix | Scope |
+| --- | --- | --- | --- | --- |
+| 2026-08-01 | comix_distro | First run of the trimmed `/resolve-issue` on #512. The trim cut Step 1's "extract title, description, labels, **and comments**" as GENERIC, leaving only `gh issue view N` — which prints the body but not the comment thread. That session read the comments anyway, by habit, and the three comments held roughly a third of the real scope plus one that **superseded an acceptance criterion still written in the body**. Following the skill literally would have shipped incomplete work while ticking every AC. Near-miss, not a failure — but only because of an unreliable habit. | Fixed in #254: the fetch step now runs `gh issue view N` **and** `gh issue view N --comments` unconditionally, with the rationale inline. **Closed out 2026-08-02** — #512 ran to completion on the fixed skill with no further surprises, and is merged and deployed. | skill |
+| 2026-09-21 | obsidian-vault, general | Reported by Joshua as weeks-long friction rather than a single incident: replies are long enough that he has to work to digest them live, and they lean on jargon and idiom — most concretely a Hermes-agent session where "the tripwire we worried about never materialized" referred back to a problem that was never re-named, leaving him to reconstruct which problem it meant. **Not a regression from the trim** — nothing about concision was ever cut (checked the attic). Suspected cause is a line Phase 7 _added_ on 2026-08-01: "Don't over-correct into terseness either — when the reasoning is load-bearing, spell it out," paired with a "give him the _why_" instruction carrying no length budget. Spans the travel period and the weeks after it. | **Not a re-add — a new style ruling,** so the no-changes-during-the-window rule does not apply. Applied same day: the anti-terseness clause is gone, and three bullets replace it — default to the short version, name things plainly, put the long version in memory/Obsidian/issues. Phase 3 should treat this as settled and confirm it, not reopen it. | global |
+| 2026-10-06 | general | Not a stumble — recorded so the log stays a complete account of every change to the global file during the window. Added one convention to Working Relationship: drafts Joshua will open go in `<project>/tmp/scratchpad/`, not the session scratchpad under `/private/tmp`, because the session path is long and hard for him to reach. This is context the model cannot derive (where Joshua wants files), so it falls in the category the premise exempts from ablation. | **Not a re-add — a new convention.** Committed same day (ed3fdb6), +24 words. Phase 3 should confirm it, not reopen it. | global |
+
+## Watch list
+
+Cuts flagged during Phase 1 as the likeliest to come back, so a stumble here is expected rather than surprising. Listing them does **not** pre-authorize a re-add — they still need two logged incidents.
+
+| Candidate | Why it's at risk |
+| --- | --- |
+| Update docs when functionality changes | Doc drift is silent; `/drift-check` is opt-in and easy to skip |
+| No commented-out code | A real model habit; only partially covered by "match surrounding idiom" |
+| Mock boundaries, not internal logic | The most opinionated testing line in the removed block |
+| Keep changes small and isolated | Cheap to state, and large diffs are hard to review after the fact |
+
+## Non-candidates
+
+Never re-add these to the global file regardless of what the log says — they are structural decisions, not preferences:
+
+- Anything already near-verbatim in Claude Code's own system prompt (see the `HARNESS` entries in [`attic-2026-08.md`](attic-2026-08.md)). If a system-prompt-covered behavior regresses, that is a model or harness observation worth reporting, not a `CLAUDE.md` line.
+- Anything relevant to fewer than half of repositories. That belongs in a project `CLAUDE.md` or a skill — the global file loads in every session, including Ukrainian-translation and dotfiles sessions with no code in them.
